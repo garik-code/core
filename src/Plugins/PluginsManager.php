@@ -336,6 +336,11 @@ final class PluginsManager
 
             $class = "\\{$nameSpace}\\{$className}";
 
+            // fix not core plugins
+            if (!($nameSpace === 'Kitrix' && $className === 'Core')) {
+                $class .= "\\{$className}";
+            }
+
             if (!class_exists($class)) {
                 throw new \Exception(Kitx::frmt("
                     Kitrix can't autoload plugin '%s', file 'vendor/autoload.php' is requiring in init code?
