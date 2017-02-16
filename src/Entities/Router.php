@@ -235,10 +235,21 @@ final class Router
             $nameSpace = $currentPage[self::ROUTE_KITRIX_NAMESPACE];
             $id = $currentPage[self::ROUTE_KITRIX_ID];
 
+            $routeVars = [];
+            foreach ($currentPage as $key => $value) {
+                if (substr($key,0,1) === '_') {
+                    continue;
+                }
+
+                $routeVars[$key] = $value;
+            }
+
             $plugin = PluginsManager::getInstance()->getPluginByClassPath($nameSpace, $id);
             if (!$plugin) {
                 return false;
             }
+
+            $context = new Context($routeVars, $plugin);
 
             // ---------------------------------------------------
             // find controller
@@ -410,7 +421,7 @@ final class Router
             // ---------------------------------------------------
 
             /** @var KitrixController $controller */
-            $controller = new $controllerName($plugin);
+            $controller = new $controllerName($context);
 
             if ($controller) {
 
@@ -420,7 +431,7 @@ final class Router
             }
 
             /** @noinspection PhpUndefinedVariableInspection */
-            $controller->$controllerAction();
+            $controller->$controllerAction(...array_values($routeVars));
 
             $this->renderedTemplate  = $controller->render($viewsControllerPath, $controllerAction);
         }

@@ -94,8 +94,8 @@ echo \Kitrix\Load::getInstance()->adminEntryPoint();
                     $pluginMenu = array(
                         'parent_menu' => 'global_menu_kitrix',
                         'section' => $plugin->getUnderScoredName(),
-                        'text' => $plugin->useAlias(),
-                        'icon' => $this->getFAIcon($plugin->useIcon()),
+                        'text' => $plugin->getAlias(),
+                        'icon' => $this->getFAIcon($plugin->getIcon()),
                         'sort' => self::CustomMenuOrder + ($plCount*200),
                         'items_id' => 'menu_'.$plugin->getHash(),
                         'items' => array(),
@@ -105,7 +105,7 @@ echo \Kitrix\Load::getInstance()->adminEntryPoint();
                     foreach ($routes as $adminRoute)
                     {
                         $routeName = $router->getRouteName($plugin, $adminRoute);
-                        $routeUrl = $router->generateLinkTo($routeName);
+                        $routeUrl = $router->generateLinkTo($routeName, $adminRoute->getDefaults());
 
                         if (!$adminRoute->isVisible()) {
                             continue;

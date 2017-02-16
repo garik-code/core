@@ -9,7 +9,7 @@ final class PluginsManager
 {
     use SingletonClass;
 
-    const FIND_PATH = ["local".DIRECTORY_SEPARATOR."kitrix", "vendor"];
+    const FIND_PATH = ["local".DIRECTORY_SEPARATOR."plugins", "vendor"];
     const CORE_PLUGIN_ID = "kitrix/core";
     const VALID_FACADE = "Kitrix\\Plugins\\Plugin";
 
@@ -211,6 +211,11 @@ final class PluginsManager
 
                 $deps = array_keys($deps);
                 foreach ($deps as $depPid) {
+
+                    // this is special composer package
+                    if ($depPid === 'composer/installers') {
+                        continue;
+                    }
 
                     // is external lib?
                     if (in_array($depPid, $externalLibs)) {

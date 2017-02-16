@@ -1,6 +1,8 @@
 {
     "extra": {
-        "isKitrixPlugin": true
+        "isKitrixPlugin": true,
+        "kitrixIcon": "fa-heartbeat",
+        "kitrixTitle": "KITRIX"
     },
     "name": "kitrix/core",
     "description": "Core class for other kitrix plugins.",

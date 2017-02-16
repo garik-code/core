@@ -42,7 +42,7 @@ class Load
             $this->requireWhoopsLib();
 
             // init plugins (and core, actually core is plugin)
-            PluginsManager::getInstance();
+            PluginsManager::getInstance()->init();
 
             // Build url router
             $this->router = Router::getInstance();

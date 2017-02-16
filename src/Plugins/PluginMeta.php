@@ -144,7 +144,7 @@ final class PluginMeta
                 $__validateRule_value => $expectedPluginID
             ],
             'type' => [
-                $__validateRule_value => 'library'
+                $__validateRule_value => 'kitrix-plugin'
             ],
             'authors' => [
                 $__validateRule_notEmpty => true,
@@ -158,7 +158,7 @@ final class PluginMeta
                 ]
             ],
             'require' => [
-                $__validateRule_containArrayKey => "kitrix/core"
+                $__validateRule_containArrayKey => "composer/installers"
             ],
         ];
 

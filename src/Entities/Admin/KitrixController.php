@@ -1,6 +1,6 @@
 <?php namespace Kitrix\Entities\Admin;
 
-use Kitrix\Plugins\Plugin;
+use Kitrix\Entities\Context;
 use League\Plates\Engine;
 
 class KitrixController
@@ -12,13 +12,13 @@ class KitrixController
     /** Template extension */
     const TEMPLATE_EXT = "tpl.php";
 
-    /** @var Plugin */
+    /** @var Context */
     private $context;
 
     /** @var array */
     private $viewBag = [];
 
-    public final function __construct(Plugin $context) {
+    public final function __construct(Context $context) {
         $this->context = $context;
     }
 
@@ -67,7 +67,7 @@ class KitrixController
     }
 
     /**
-     * @return Plugin
+     * @return Context
      */
     public final function getContext() {
         return $this->context;

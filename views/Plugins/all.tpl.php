@@ -35,8 +35,8 @@ foreach ($plugins as $plugin) {
     ob_start();
     ?>
     <b>
-        <i class="fa <?=$plugin->useIcon()?>"></i>
-        <?=$plugin->useAlias()?> (<?=$plugin->getId()?>)
+        <i class="fa <?=$plugin->getIcon()?>"></i>
+        <?=$plugin->getAlias()?> (<?=$plugin->getId()?>)
     </b><br/>
     <small>
         <?=$plugin->getConfDesc()?>

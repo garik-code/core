@@ -5,16 +5,6 @@ use Kitrix\Plugins\Plugin;
 
 class Core extends Plugin
 {
-    public function useAlias()
-    {
-        return "KITRIX";
-    }
-
-    public function useIcon()
-    {
-        return "fa-heartbeat";
-    }
-
     public function registerRoutes(): array
     {
         $index = new Route("/", [

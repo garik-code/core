@@ -38,6 +38,9 @@ class Plugin
     /** @var array */
     private $confAuthors;
 
+    /** @var array */
+    private $confExtra;
+
     /**
      * Plugin constructor.
      * @param PluginMeta $meta
@@ -57,6 +60,7 @@ class Plugin
         $this->confAuthors = $meta->getConfig()['authors'] ?: [[
             "name" => "Acme"
         ]];
+        $this->confExtra = $meta->getConfig()['extra'] ?: [];
 
         if (!$this->isDisabled()) {
             $this->run();
@@ -195,6 +199,35 @@ class Plugin
         return sha1($this->getClassPath());
     }
 
+
+    /**
+     * Return plugin name from composer.json
+     * Name should be stay in "extra"
+     * group of settings with key "kitrixTitle"
+     *
+     * @return string
+     */
+    public final function getAlias() {
+
+        return $this->confExtra["kitrixTitle"] ?: $this->getConfName();
+    }
+
+    /**
+     * You can provide any icon string from
+     * font awesome. This icon will be
+     * displayed in admin menu
+     *
+     * Icon should be stay in composer.json "extra"
+     * group of settings with key "kitrixIcon"
+     *
+     * ex. "fa-user"
+     *
+     * @return string
+     */
+    public final function getIcon() {
+        return $this->confExtra["kitrixIcon"] ?: "fa-cube";
+    }
+
     /** =========== EXTENDABLE API ============================================= */
 
     /**
@@ -230,30 +263,6 @@ class Plugin
     public function registerRoutes(): array
     {
         return [];
-    }
-
-    /**
-     * You can provide custom plugin name,
-     * name will be used an any admin labels
-     * and replace auto name like 'kitrix/core'
-     *
-     * @return string
-     */
-    public function useAlias() {
-        return $this->getConfName();
-    }
-
-    /**
-     * You can provide any icon string from
-     * font awesome. This icon will be
-     * displayed in admin menu
-     *
-     * ex. "fa-user"
-     *
-     * @return string
-     */
-    public function useIcon() {
-        return "fa-cube";
     }
 
     /** =========== PROTECTED STAFF ============================================= */
