@@ -1,0 +1,111 @@
+.ktrx-admin-menu-fa-icon
+{
+  margin: 0;
+  padding: 0;
+  background: none;
+  width: 21px;
+  height: 20px;
+  font-size: 15px;
+  left: 0;
+  top: 6px;
+  position: relative;
+  color: #626a78;
+
+  .adm-submenu-item-name &
+  {
+    width: 32px;
+    left: 10px;
+  }
+}
+
+.adm-main-menu-item
+{
+  &.adm-kitrix
+  {
+    padding-top: 12px;
+
+    .adm-main-menu-item-text
+    {
+      font-size: 9px;
+      text-transform: uppercase;
+      color: black;
+    }
+
+    .adm-main-menu-item-icon
+    {
+      background: url("../img/octocat.png") no-repeat;
+      height: 35px;
+      background-size: contain;
+      background-position: center;
+      margin-bottom: 12px;
+    }
+
+    &.adm-main-menu-item-active
+    {
+      .adm-main-menu-item-text
+      {
+        color: white;
+      }
+    }
+  }
+}
+
+.ktrx-about-block
+{
+  background: white;
+  padding: 10px 20px;
+  font-size: 18px;
+
+  h1
+  {
+    font-size: 32px;
+  }
+
+  h2
+  {
+    font-size: 26px;
+  }
+
+  h3
+  {
+    font-size: 22px;
+  }
+}
+
+// ------ Plugins Page
+
+.ktrx-core-plugin-status
+{
+  color: gray;
+
+  .kitrix-core-status-circle
+  {
+    width: 12px;
+    height: 12px;
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    border-radius: 100%;
+    background-color: gray;
+  }
+
+  &.ktrx-core-enabled
+  {
+    color: forestgreen;
+
+    .kitrix-core-status-circle
+    {
+      background-color: forestgreen;
+    }
+  }
+
+  &.ktrx-core-disabled
+  {
+    color: darkred;
+
+    .kitrix-core-status-circle
+    {
+      background-color: darkred;
+    }
+  }
+}

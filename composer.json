@@ -1,0 +1,27 @@
+{
+    "extra": {
+        "isKitrixPlugin": true
+    },
+    "name": "kitrix/core",
+    "description": "Core class for other kitrix plugins.",
+    "type": "library",
+    "license": "GPL-3.0",
+    "authors": [
+        {
+            "name": "Fe3dback",
+            "email": "fe3dback@yandex.ru"
+        }
+    ],
+    "autoload": {
+        "psr-4": {"Kitrix\\": "src/"}
+    },
+    "minimum-stability": "dev",
+    "require": {
+        "league/plates": "^3.3",
+        "symfony/routing": "^3.2",
+        "filp/whoops": "^2.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.0"
+    }
+}
