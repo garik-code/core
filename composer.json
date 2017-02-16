@@ -6,6 +6,7 @@
     "description": "Core class for other kitrix plugins.",
     "type": "library",
     "license": "GPL-3.0",
+    "version": "0.1.0",
     "authors": [
         {
             "name": "Fe3dback",
