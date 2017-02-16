@@ -1,6 +1,7 @@
 <?php namespace Kitrix\Plugins;
 
 use Kitrix\Common\Kitx;
+use Kitrix\Common\NotKitrixPluginException;
 use Kitrix\Common\SingletonClass;
 use Kitrix\Entities\InternalDB;
 
@@ -144,6 +145,9 @@ final class PluginsManager
                 try
                 {
                     $pluginMeta = new PluginMeta($item, $vendor);
+                }
+                catch (NotKitrixPluginException $e) {
+                    continue;
                 }
                 catch (\Exception $e) {
 

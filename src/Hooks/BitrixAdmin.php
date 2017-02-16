@@ -29,6 +29,9 @@ echo \Kitrix\Load::getInstance()->adminEntryPoint();
         global $APPLICATION;
 
         $core = PluginsManager::getInstance()->getPluginByPID('kitrix/core');
+        if (!$core) {
+            return $this;
+        }
 
         $stylesRoot =
             $core->getLocalDirectory() . DIRECTORY_SEPARATOR .

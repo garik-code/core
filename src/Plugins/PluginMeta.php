@@ -1,6 +1,7 @@
 <?php namespace Kitrix\Plugins;
 
 use Kitrix\Common\Kitx;
+use Kitrix\Common\NotKitrixPluginException;
 
 final class PluginMeta
 {
@@ -29,7 +30,7 @@ final class PluginMeta
 
         $pluginIsValid = $this->validate();
         if (!$pluginIsValid) {
-            throw new \Exception(Kitx::frmt("
+            throw new NotKitrixPluginException(Kitx::frmt("
                 Plugin '%s' is invalid, can't load it into kitrix
             ", $realDirectory->getRealPath()));
         }
