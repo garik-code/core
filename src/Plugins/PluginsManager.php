@@ -182,7 +182,7 @@ final class PluginsManager
 
 
         // Build external requirements map of available libs
-        $externalLibs = [];
+        $externalLibs = $this->findLibFoldersInPath($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . "vendor");
 
         foreach ($metaPlugins as $metaPlugin) {
 
@@ -239,9 +239,9 @@ final class PluginsManager
                             Plugin '%s' require disabled kitrix plugin '%s',
                             so this plugin can't be loaded too.
                         ", [
-                                $metaPlugin->getPid(),
-                                $depPid,
-                            ])));
+                            $metaPlugin->getPid(),
+                            $depPid,
+                        ])));
                         $metaPlugin->disable();
                         $pidsForChecking = $metaPlugins;
                         break;
@@ -324,23 +324,26 @@ final class PluginsManager
                 DIRECTORY_SEPARATOR .
                 "autoload.php";
 
-            if (!is_file($loadScript)) {
-                throw new \Exception(Kitx::frmt("
-                    Kitrix can't autoload plugin '%s' because file 'autoload.php'
-                    not found in '%s'
-                ", [
-                    $metaPlugin->getPid(),
-                    $loadScript
-                ]));
-            }
+            // load local kitrix plugin
+            if (is_file($loadScript)) {
 
-            /** @noinspection PhpIncludeInspection */
-            require_once($loadScript);
+                /** @noinspection PhpIncludeInspection */
+                require_once($loadScript);
+            }
 
             $nameSpace = $metaPlugin->getVendorName();
             $className = $metaPlugin->getName();
 
             $class = "\\{$nameSpace}\\{$className}";
+
+            if (!class_exists($class)) {
+                throw new \Exception(Kitx::frmt("
+                    Kitrix can't autoload plugin '%s', file 'vendor/autoload.php' is requiring in init code?
+                ", [
+                    $metaPlugin->getPid(),
+                    $loadScript
+                ]));
+            }
 
             /** @var Plugin $plugin */
             $plugin = new $class($metaPlugin);
