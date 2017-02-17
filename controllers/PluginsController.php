@@ -7,7 +7,7 @@ class PluginsController extends KitrixController
 {
     public function all() {
 
-        $plugins = PluginsManager::getInstance()->getLoadedPlugins();
+        $plugins = PluginsManager::getInstance()->getMetaPluginsList();
 
         // bitrix table
         $sTableID = "ktrx_plug_list";

@@ -94,8 +94,8 @@ echo \Kitrix\Load::getInstance()->adminEntryPoint();
                     $pluginMenu = array(
                         'parent_menu' => 'global_menu_kitrix',
                         'section' => $plugin->getUnderScoredName(),
-                        'text' => $plugin->getAlias(),
-                        'icon' => $this->getFAIcon($plugin->getIcon()),
+                        'text' => $plugin->getConfig()->getAlias(),
+                        'icon' => $this->getFAIcon($plugin->getConfig()->getIcon()),
                         'sort' => self::CustomMenuOrder + ($plCount*200),
                         'items_id' => 'menu_'.$plugin->getHash(),
                         'items' => array(),

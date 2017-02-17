@@ -23,23 +23,8 @@ class Plugin
     /** @var bool */
     private $disabled = false;
 
-    /** @var array - [libId => ver] */
-    private $dependencies = [];
-
-    /** @var string */
-    private $confName;
-
-    /** @var string */
-    private $confDesc;
-
-    /** @var string */
-    private $confLicence;
-
-    /** @var array */
-    private $confAuthors;
-
-    /** @var array */
-    private $confExtra;
+    /** @var PluginConfig */
+    private $config;
 
     /**
      * Plugin constructor.
@@ -52,15 +37,7 @@ class Plugin
         $this->className = $meta->getName();
         $this->localDirectory = $meta->getDirectory()->getRealPath();
         $this->disabled = !!$meta->isDisabled();
-        $this->dependencies = $meta->getRequirements();
-
-        $this->confName = $meta->getConfig()['name'] ?: $this->id;
-        $this->confDesc = $meta->getConfig()['description'] ?: "Another Kitrix plugin";
-        $this->confLicence = $meta->getConfig()['license'] ?: "MIT (default)";
-        $this->confAuthors = $meta->getConfig()['authors'] ?: [[
-            "name" => "Acme"
-        ]];
-        $this->confExtra = $meta->getConfig()['extra'] ?: [];
+        $this->config = $meta->getConfig();
 
         if (!$this->isDisabled()) {
             $this->run();
@@ -120,54 +97,13 @@ class Plugin
     }
 
     /**
-     * Get plugin dependencies list
-     * [pid => version]
+     * Return plugin config (parsed composer.json)
      *
-     * @return array
+     * @return PluginConfig
      */
-    public final function getDependencies(): array
+    public final function getConfig(): PluginConfig
     {
-        return $this->dependencies;
-    }
-
-    /**
-     * Get plugin name in package registry
-     *
-     * @return string
-     */
-    public final function getConfName(): string
-    {
-        return $this->confName;
-    }
-
-    /**
-     * Get plugin description
-     *
-     * @return string
-     */
-    public final function getConfDesc(): string
-    {
-        return $this->confDesc;
-    }
-
-    /**
-     * Get plugin license
-     *
-     * @return string
-     */
-    public final function getConfLicence(): string
-    {
-        return $this->confLicence;
-    }
-
-    /**
-     * Get array of plugin authors
-     *
-     * @return array
-     */
-    public final function getConfAuthors(): array
-    {
-        return $this->confAuthors;
+        return $this->config;
     }
 
     /**
@@ -197,35 +133,6 @@ class Plugin
      */
     public final function getHash() {
         return sha1($this->getClassPath());
-    }
-
-
-    /**
-     * Return plugin name from composer.json
-     * Name should be stay in "extra"
-     * group of settings with key "kitrixTitle"
-     *
-     * @return string
-     */
-    public final function getAlias() {
-
-        return $this->confExtra["kitrixTitle"] ?: $this->getConfName();
-    }
-
-    /**
-     * You can provide any icon string from
-     * font awesome. This icon will be
-     * displayed in admin menu
-     *
-     * Icon should be stay in composer.json "extra"
-     * group of settings with key "kitrixIcon"
-     *
-     * ex. "fa-user"
-     *
-     * @return string
-     */
-    public final function getIcon() {
-        return $this->confExtra["kitrixIcon"] ?: "fa-cube";
     }
 
     /** =========== EXTENDABLE API ============================================= */

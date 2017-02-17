@@ -51,7 +51,7 @@ final class PluginsManager
         $this->localPlugins = $this->getLocalPlugins(self::FIND_PATH, $this->disabledPIDs);
 
         // Build dependencies tree
-        $this->checkDependencies($this->localPlugins);
+        $this->checkDependencies();
 
         // autoload plugins
         $this->registeredPlugins = $this->autoload($this->localPlugins);
@@ -172,23 +172,15 @@ final class PluginsManager
      * Check dependencies of plugins, if dep is not installed, disable
      * meta plugin.
      *
-     * @param PluginMeta[] $metaPlugins
      * @throws \Exception
      */
-    private function checkDependencies(&$metaPlugins) {
+    private function checkDependencies() {
 
         $maxReqursion = 500;
+        $metaPlugins = $this->getMetaPluginsList();
         $pidsForChecking = $metaPlugins;
 
-
-        // Build external requirements map of available libs
-        $externalLibs = $this->findLibFoldersInPath($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . "vendor");
-
-        foreach ($metaPlugins as $metaPlugin) {
-
-            $vendorDir = $metaPlugin->getDirectory()->getRealPath() . DIRECTORY_SEPARATOR . "vendor";
-            $externalLibs += $this->findLibFoldersInPath($vendorDir);
-        }
+        $externalLibs = $this->getExternalLibs();
 
         while (count($pidsForChecking)) {
 
@@ -204,7 +196,7 @@ final class PluginsManager
                     continue;
                 }
 
-                $deps = $metaPlugin->getRequirements();
+                $deps = $metaPlugin->getConfig()->getDependencies();
                 if (!count($deps)) {
                     continue;
                 }
@@ -378,6 +370,27 @@ final class PluginsManager
 
     }
 
+    /**
+     * Return all external libs
+     *
+     * @return array
+     */
+    private function getExternalLibs() {
+
+        $metaPlugins = $this->getMetaPluginsList();
+
+        // Build external requirements map of available libs
+        $externalLibs = $this->findLibFoldersInPath($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . "vendor");
+
+        foreach ($metaPlugins as $metaPlugin) {
+
+            $vendorDir = $metaPlugin->getDirectory()->getRealPath() . DIRECTORY_SEPARATOR . "vendor";
+            $externalLibs += $this->findLibFoldersInPath($vendorDir);
+        }
+
+        return $externalLibs;
+    }
+
     /** =========== API ============================================= */
 
     /**
@@ -424,6 +437,51 @@ final class PluginsManager
     public function getLoadedPlugins(): array
     {
         return $this->registeredPlugins;
+    }
+
+
+    /**
+     * Get dependencies status for plugin
+     *
+     * @param $pid
+     * @return array
+     */
+    public function getDependenciesStatusForPluginByPID($pid) {
+
+        $external = $this->getExternalLibs();
+        $plugins = $this->getMetaPluginsList();
+        $status = [];
+
+        foreach ($plugins as $pluginMeta)
+        {
+            if ($pluginMeta->getPid() !== $pid)
+            {
+                continue;
+            }
+
+            // find meta
+            $deps = array_keys($pluginMeta->getConfig()->getDependencies());
+            foreach ($deps as $dep) {
+
+                if (in_array($dep, $external)) {
+                    $status[$dep] = true;
+                    continue;
+                }
+
+                if (in_array($dep, array_keys($plugins))) {
+
+                    $_refPlugin = $plugins[$dep];
+                    if ($_refPlugin->isDisabled()) {
+                        $status[$dep] = true;
+                        continue;
+                    }
+                }
+
+                $status[$dep] = false;
+            }
+        }
+
+        return $status;
     }
 
 

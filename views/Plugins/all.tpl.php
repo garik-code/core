@@ -1,5 +1,5 @@
 <?
-/** @var \Kitrix\Plugins\Plugin[] $plugins */
+/** @var \Kitrix\Plugins\PluginMeta[] $plugins */
 /** @var \CAdminList $adminTable */
 
 $adminTable->BeginPrologContent();
@@ -23,24 +23,29 @@ $adminTable->AddHeaders([
         "id" => "REQUIREMENTS",
         "content" => "Зависимости",
         "default" => true,
+    ],
+    [
+        "id" => "VERSION",
+        "content" => "Версия",
+        "default" => true,
     ]
 ]);
 
 foreach ($plugins as $plugin) {
 
-    $row =& $adminTable->AddRow($plugin->getHash(), []);
+    $row =& $adminTable->AddRow($plugin->getPid(), []);
 
     // ============ NAME =============
 
     ob_start();
     ?>
     <b>
-        <i class="fa <?=$plugin->getIcon()?>"></i>
-        <?=$plugin->getAlias()?> (<?=$plugin->getId()?>)
+        <i class="fa <?=$plugin->getConfig()->getIcon()?>"></i>
+        <?=$plugin->getConfig()->getAlias()?> (<?=$plugin->getPid()?>)
     </b><br/>
     <small>
-        <?=$plugin->getConfDesc()?>
-        <br /><br /><i>Лицензия: <?=$plugin->getConfLicence()?></i>
+        <?=$plugin->getConfig()->getDesc()?>
+        <br /><br /><i>Лицензия: <?=$plugin->getConfig()->getLicence()?></i>
     </small>
     <?
     $_fName = ob_get_clean();
@@ -48,7 +53,7 @@ foreach ($plugins as $plugin) {
     // ============ AUTHORS =============
     ob_start();
     ?>
-    <?foreach ($plugin->getConfAuthors() as $fields):?>
+    <?foreach ($plugin->getConfig()->getAuthors() as $fields):?>
 
         <div>
             <?if(count($fields) >= 1):?>
@@ -75,13 +80,34 @@ foreach ($plugins as $plugin) {
     // ============ REQUIREMENTS =============
     ob_start();
     ?>
-    <?foreach ($plugin->getDependencies() as $name => $version):?>
+    <?
+        $depsStatus = $plugin->getDependenciesStatus();
+    ?>
+    <?foreach ($plugin->getConfig()->getDependencies() as $name => $version):?>
         <div>
-            <a href="https://packagist.org/packages/<?=$name?>" target="_blank"><?=$name?></a> (<?=$version?>)
+            <?
+                $isEnabled = $depsStatus[$name];
+            ?>
+
+            <div class="ktrx-core-dep-status <?=$isEnabled ? "ktrx-core-enabled" : "ktrx-core-disabled"?>">
+                <div class="kitrix-core-status-circle"></div>
+            </div>
+
+            <a href="https://packagist.org/packages/<?=$name?>" target="_blank">
+                <?=$name?>
+            </a>
+            (<?=$version?>)
         </div>
     <?endforeach;?>
     <?
     $_fRequirements = ob_get_clean();
+
+    // ============ VERSION =============
+    ob_start();
+    ?>
+    <div><?=$plugin->getConfig()->getVersion()?></div>
+    <?
+    $_fVersion = ob_get_clean();
 
     // ============ PROVIDE TEMPLATES TO TABLE =============
 
@@ -89,6 +115,7 @@ foreach ($plugins as $plugin) {
     $row->AddViewField("AUTHOR", $_fAuthors);
     $row->AddViewField("ENABLED", $_fStatus);
     $row->AddViewField("REQUIREMENTS", $_fRequirements);
+    $row->AddViewField("VERSION", $_fVersion);
 
     // ============ ACTIONS =============
 

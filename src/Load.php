@@ -80,7 +80,30 @@ class Load
         /** @var \CMain $APPLICATION */
         global $APPLICATION;
 
-        $this->router->execute();
+        $halt = false;
+
+        if ($this->router)
+        {
+            try
+            {
+                $this->router->execute();
+            }
+            catch (\Exception $e)
+            {
+                $halt = true;
+            }
+        }
+        else
+        {
+            $halt = true;
+        }
+
+        if ($halt) {
+            return Kitx::frmt(
+                "Fatal kitrix boot error. Please check __KITRIX_BOOT_LOG_HALT.txt for details", []
+            );
+        }
+
         $APPLICATION->SetTitle("Kitrix");
 
         if ($this->router->isPageExist()) {

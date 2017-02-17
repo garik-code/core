@@ -46,10 +46,12 @@
 .ktrx-about-block h3 {
   font-size: 22px;
 }
-.ktrx-core-plugin-status {
+.ktrx-core-plugin-status,
+.ktrx-core-dep-status {
   color: gray;
 }
-.ktrx-core-plugin-status .kitrix-core-status-circle {
+.ktrx-core-plugin-status .kitrix-core-status-circle,
+.ktrx-core-dep-status .kitrix-core-status-circle {
   width: 12px;
   height: 12px;
   display: inline-block;
@@ -58,15 +60,28 @@
   border-radius: 100%;
   background-color: gray;
 }
-.ktrx-core-plugin-status.ktrx-core-enabled {
+.ktrx-core-plugin-status.ktrx-core-enabled,
+.ktrx-core-dep-status.ktrx-core-enabled {
   color: forestgreen;
 }
-.ktrx-core-plugin-status.ktrx-core-enabled .kitrix-core-status-circle {
+.ktrx-core-plugin-status.ktrx-core-enabled .kitrix-core-status-circle,
+.ktrx-core-dep-status.ktrx-core-enabled .kitrix-core-status-circle {
   background-color: forestgreen;
 }
-.ktrx-core-plugin-status.ktrx-core-disabled {
+.ktrx-core-plugin-status.ktrx-core-disabled,
+.ktrx-core-dep-status.ktrx-core-disabled {
   color: darkred;
 }
-.ktrx-core-plugin-status.ktrx-core-disabled .kitrix-core-status-circle {
+.ktrx-core-plugin-status.ktrx-core-disabled .kitrix-core-status-circle,
+.ktrx-core-dep-status.ktrx-core-disabled .kitrix-core-status-circle {
   background-color: darkred;
+}
+.ktrx-core-plugin-status.ktrx-core-dep-status,
+.ktrx-core-dep-status.ktrx-core-dep-status {
+  display: inline-block;
+}
+.ktrx-core-plugin-status.ktrx-core-dep-status .kitrix-core-status-circle,
+.ktrx-core-dep-status.ktrx-core-dep-status .kitrix-core-status-circle {
+  width: 8px;
+  height: 8px;
 }
