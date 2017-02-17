@@ -2,6 +2,7 @@
 
 use Kitrix\Common\Kitx;
 use Kitrix\Common\SingletonClass;
+use const Kitrix\DS;
 use Kitrix\Entities\Admin\KitrixController;
 use Kitrix\Entities\Admin\Route as KitrixRoute;
 use Kitrix\Plugins\Plugin;
@@ -261,13 +262,13 @@ final class Router
             // ex. /var/www/project/../kitrix.core/controllers
             $controllersPath =
                 $plugin->getLocalDirectory() .
-                DIRECTORY_SEPARATOR .
+                DS .
                 self::DEFAULT_CONTROLLERS_DIRECTORY;
 
             // ex. /var/www/project/../kitrix.core/controllers/BooksController.php
             $controllerFile =
                 $controllersPath .
-                DIRECTORY_SEPARATOR .
+                DS .
                 $className . '.php';
 
             // ex. \Kitrix\Core\BooksController
@@ -364,17 +365,17 @@ final class Router
             // ex. /var/www/project/../kitrix.core/views
             $viewsPath =
                 $plugin->getLocalDirectory() .
-                DIRECTORY_SEPARATOR .
+                DS .
                 KitrixController::TEMPLATE_ROOT;
 
             $viewsControllerPath =
                 $viewsPath .
-                DIRECTORY_SEPARATOR .
+                DS .
                 $currentPage['_controller'];
 
             $viewPath =
                 $viewsControllerPath .
-                DIRECTORY_SEPARATOR .
+                DS .
                 $controllerAction . "." .
                 KitrixController::TEMPLATE_EXT;
 
@@ -426,6 +427,7 @@ final class Router
             if ($controller) {
 
                 // for bitrix admin classes, we need to force include lib
+                \CJSCore::Init(['jquery']);
                 require_once($_SERVER['DOCUMENT_ROOT'] . "/bitrix/modules/main/interface/admin_lib.php");
 
             }

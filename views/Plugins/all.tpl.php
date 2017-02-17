@@ -119,17 +119,56 @@ foreach ($plugins as $plugin) {
 
     // ============ ACTIONS =============
 
-    $row->AddActions([
-        [
-            "ICON" => "add",
+    $actions = [];
+    if ($plugin->isDisabled())
+    {
+        $actions[] = [
+            "ICON" => "enable",
             "DEFAULT" => true,
             "TEXT" => "Включить",
-            "ACTION" => "console.log('test')",
-        ],
-    ]);
+            "ACTION" => "KitrixCorePlugins.enable(\"{$plugin->getPid()}\")",
+        ];
+
+        $actions[] = [
+            "ICON" => "delete",
+            "DEFAULT" => true,
+            "TEXT" => "Удалить",
+            "ACTION" => "KitrixCorePlugins.remove(\"{$plugin->getPid()}\")",
+        ];
+    }
+    else
+    {
+        $actions[] = [
+            "ICON" => "disable",
+            "DEFAULT" => true,
+            "TEXT" => "Выключить",
+            "ACTION" => "KitrixCorePlugins.disable(\"{$plugin->getPid()}\")",
+        ];
+    }
+
+    $row->AddActions($actions);
 }
 
 $adminTable->CheckListMode();
 ?>
 
 <?$adminTable->DisplayList();?>
+
+<?
+    $jsPlugs = [];
+    foreach ($plugins as $plugin) {
+        $jsPlugs[$plugin->getPid()] = [
+            'title' => $plugin->getConfig()->getAlias()
+        ];
+    }
+
+    $jsParams = json_encode([
+        'url' => \Kitrix\Entities\Router::getInstance()->generateLinkTo('kitrix_core_plugins'),
+        'plugins' => $jsPlugs,
+        'pids' => array_keys($jsPlugs)
+    ])
+?>
+
+<script type="application/javascript">
+    KitrixCorePluginsParams = <?=$jsParams?>;
+</script>

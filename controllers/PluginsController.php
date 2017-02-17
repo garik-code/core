@@ -1,12 +1,13 @@
 <?php namespace Kitrix\Core;
 
+use Kitrix\Common\Kitx;
 use Kitrix\Entities\Admin\KitrixController;
 use Kitrix\Plugins\PluginsManager;
 
 class PluginsController extends KitrixController
 {
-    public function all() {
-
+    public function all()
+    {
         $plugins = PluginsManager::getInstance()->getMetaPluginsList();
 
         // bitrix table
@@ -16,5 +17,17 @@ class PluginsController extends KitrixController
         // send to view
         $this->set('adminTable', $lAdmin);
         $this->set('plugins', $plugins);
+    }
+
+    private function disable($id) {
+        Kitx::pr($id);
+    }
+
+    private function enable($id) {
+        Kitx::pr($id);
+    }
+
+    private function remove($id) {
+        Kitx::pr($id);
     }
 }

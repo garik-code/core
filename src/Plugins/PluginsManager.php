@@ -3,13 +3,15 @@
 use Kitrix\Common\Kitx;
 use Kitrix\Common\NotKitrixPluginException;
 use Kitrix\Common\SingletonClass;
+use const Kitrix\DS;
 use Kitrix\Entities\InternalDB;
+use Kitrix\Load;
 
 final class PluginsManager
 {
     use SingletonClass;
 
-    const FIND_PATH = ["local".DIRECTORY_SEPARATOR."plugins", "vendor"];
+    const FIND_PATH = [Load::KITRIX_PLUGINS_PATH, "vendor"];
     const CORE_PLUGIN_ID = "kitrix/core";
     const VALID_FACADE = "Kitrix\\Plugins\\Plugin";
 
@@ -92,7 +94,7 @@ final class PluginsManager
 
         foreach ($locationsToSearch as $relPath) {
 
-            $searchIn = $basePath . DIRECTORY_SEPARATOR . trim($relPath, DIRECTORY_SEPARATOR);
+            $searchIn = $basePath . DS . trim($relPath, DS);
             if (!is_dir($searchIn)) {
                 continue;
             }
@@ -284,7 +286,7 @@ final class PluginsManager
                     continue;
                 }
 
-                if (!is_file($subItem->getRealPath() . DIRECTORY_SEPARATOR . "composer.json")) {
+                if (!is_file($subItem->getRealPath() . DS . "composer.json")) {
                     continue;
                 }
 
@@ -316,9 +318,9 @@ final class PluginsManager
             // load
             $loadScript =
                 $metaPlugin->getDirectory()->getRealPath() .
-                DIRECTORY_SEPARATOR .
+                DS .
                 "vendor" .
-                DIRECTORY_SEPARATOR .
+                DS .
                 "autoload.php";
 
             // load local kitrix plugin
@@ -380,11 +382,11 @@ final class PluginsManager
         $metaPlugins = $this->getMetaPluginsList();
 
         // Build external requirements map of available libs
-        $externalLibs = $this->findLibFoldersInPath($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . "vendor");
+        $externalLibs = $this->findLibFoldersInPath($_SERVER['DOCUMENT_ROOT'] . DS . "vendor");
 
         foreach ($metaPlugins as $metaPlugin) {
 
-            $vendorDir = $metaPlugin->getDirectory()->getRealPath() . DIRECTORY_SEPARATOR . "vendor";
+            $vendorDir = $metaPlugin->getDirectory()->getRealPath() . DS . "vendor";
             $externalLibs += $this->findLibFoldersInPath($vendorDir);
         }
 

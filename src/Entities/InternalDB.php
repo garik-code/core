@@ -1,6 +1,8 @@
 <?php namespace Kitrix\Entities;
 use Kitrix\Common\Kitx;
 use Kitrix\Common\SingletonClass;
+use const Kitrix\DS;
+use Kitrix\Load;
 
 /**
  * Internal DB resolve system settings problem
@@ -15,7 +17,7 @@ final class InternalDB
 {
     use SingletonClass;
 
-    const DB_PATH = DIRECTORY_SEPARATOR . "db";
+    const DB_PATH = Load::KITRIX_CONFIG_PATH;
 
     const DB_PLUG_DISABLED_PIDS = "plugins_disabled";
 
@@ -92,7 +94,7 @@ final class InternalDB
      * @return string
      */
     public final function getDBPath() {
-        return __DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . ".." . self::DB_PATH;
+        return $_SERVER['DOCUMENT_ROOT'] . DS . self::DB_PATH;
     }
 
     /**
@@ -112,7 +114,7 @@ final class InternalDB
             return false;
         }
 
-        $hpcPath = $this->getDBPath() . DIRECTORY_SEPARATOR . $name . ".json";
+        $hpcPath = $this->getDBPath() . DS . $name . ".json";
         if (is_file($hpcPath)) {
             return false;
         }

@@ -9,8 +9,15 @@ use Kitrix\Plugins\PluginsManager;
 use Whoops\Handler\PrettyPageHandler;
 use Whoops\Run;
 
+const DS = DIRECTORY_SEPARATOR;
+
 class Load
 {
+    const KITRIX_ROOT_PATH = "local" . DS . "kitrix";
+    const KITRIX_PLUGINS_PATH = self::KITRIX_ROOT_PATH . DS . "plugins";
+    const KITRIX_CONFIG_PATH = self::KITRIX_ROOT_PATH . DS . "db";
+    const KITRIX_TMP_PATH = self::KITRIX_ROOT_PATH . DS . "tmp";
+
     use SingletonClass;
 
     /** @var bool - App run in debug mode? */
@@ -40,6 +47,9 @@ class Load
         {
             // load exception handler
             $this->requireWhoopsLib();
+
+            // self check
+            $this->selfRepair();
 
             // init plugins (and core, actually core is plugin)
             PluginsManager::getInstance()->init();
@@ -118,6 +128,34 @@ class Load
     }
 
     /** ================== INTERNAL ====================== */
+
+    /**
+     * check important staff for normal env working
+     */
+    private function selfRepair() {
+
+        $requiredFolders = [
+            $_SERVER['DOCUMENT_ROOT'] . DS . self::KITRIX_ROOT_PATH,
+            $_SERVER['DOCUMENT_ROOT'] . DS . self::KITRIX_CONFIG_PATH,
+            $_SERVER['DOCUMENT_ROOT'] . DS . self::KITRIX_PLUGINS_PATH,
+            $_SERVER['DOCUMENT_ROOT'] . DS . self::KITRIX_TMP_PATH
+        ];
+
+        foreach ($requiredFolders as $path) {
+
+            if (!is_dir($path)) {
+                $status = mkdir($path, 0775, true);
+                if (!$status) {
+                    throw new \Exception(Kitx::frmt("
+                        Kitrix cannot create important directory for normal working.
+                        Check access rights for this dir: '%s'
+                    ", [$path]));
+                }
+            }
+        }
+
+        return true;
+    }
 
     /**
      * Auto handling exception by external lib

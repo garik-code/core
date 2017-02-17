@@ -1,7 +1,9 @@
 <?php namespace Kitrix\Hooks;
 
 use Bitrix\Main\EventManager;
+use Bitrix\Main\Page\Asset;
 use Kitrix\Common\InjectException;
+use const Kitrix\DS;
 use Kitrix\Entities\Router;
 use Kitrix\Plugins\PluginsManager;
 
@@ -34,21 +36,29 @@ echo \Kitrix\Load::getInstance()->adminEntryPoint();
         }
 
         $stylesRoot =
-            $core->getLocalDirectory() . DIRECTORY_SEPARATOR .
-            "public" . DIRECTORY_SEPARATOR . "styles";
+            $core->getLocalDirectory() . DS .
+            "public" . DS . "styles";
+
+        $scriptsRoot =
+            $core->getLocalDirectory() . DS .
+            "public" . DS . "js";
 
         $vendorRoot =
-            $core->getLocalDirectory() . DIRECTORY_SEPARATOR .
-            "public" . DIRECTORY_SEPARATOR . "vendor";
+            $core->getLocalDirectory() . DS .
+            "public" . DS . "vendor";
 
         // boot kitrix styles
         $styles = [
             $vendorRoot .
-                DIRECTORY_SEPARATOR . "font-awesome-4.7.0" .
-                DIRECTORY_SEPARATOR . "css" .
-                DIRECTORY_SEPARATOR . "font-awesome.min.css",
+                DS . "font-awesome-4.7.0" .
+                DS . "css" .
+                DS . "font-awesome.min.css",
 
-            $stylesRoot . DIRECTORY_SEPARATOR . "admin.css"
+            $stylesRoot . DS . "admin.css"
+        ];
+
+        $scripts = [
+            $scriptsRoot . DS . "KitrixCorePlugins.js"
         ];
 
         foreach ($styles as $style) {
@@ -57,6 +67,15 @@ echo \Kitrix\Load::getInstance()->adminEntryPoint();
 
             $style = str_replace($projectRoot, '', $style);
             $APPLICATION->SetAdditionalCSS($style);
+        }
+
+        foreach ($scripts as $script) {
+
+            $projectRoot = realpath($_SERVER['DOCUMENT_ROOT']);
+
+            $script = str_replace($projectRoot, '', $script);
+            Asset::getInstance()->addJs($script);
+
         }
 
         return $this;
