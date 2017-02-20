@@ -1,44 +1,41 @@
 <?php namespace Kitrix;
 
-use Kitrix\Entities\Admin\Route;
+use Kitrix\Core\IndexController;
+use Kitrix\Core\PluginsController;
+use Kitrix\Entities\Admin\RouteFactory;
+use Kitrix\Entities\Asset;
 use Kitrix\Plugins\Plugin;
 
 class Core extends Plugin
 {
+    public function registerAssets(): array
+    {
+        return [
+            new Asset('/styles/admin.css', Asset::CSS),
+            new Asset('/vendor/font-awesome-4.7.0/css/font-awesome.min.css', Asset::CSS),
+            new Asset('/js/KitrixCorePlugins.js', Asset::JS)
+        ];
+    }
+
     public function registerRoutes(): array
     {
         $routes = [];
 
-        $index = new Route("/", [
-            "_controller" => "Index",
-            "_action" => "about"
-        ]);
-        $index
+        // Index
+        // -----------
+        $routes[] = RouteFactory::makeRoute('/', IndexController::class, 'about')
             ->setTitle("О Kitrix")
             ->setIcon("fa-file-text-o");
-        $routes[] = $index;
 
         // Plugins
-        $actionLinks = ['disable', 'enable', 'remove'];
-        foreach ($actionLinks as $link) {
-            $tmp = new Route("/plugins/{action}/{id}", [
-                "_controller" => "Plugins",
-                "_action" => "{action}",
-                "action" => $link,
-                "id" => 0
-            ]);
-            $tmp->setVisible(true);
-            $routes[] = $tmp;
-        }
-
-        $plugins = new Route("/plugins/", [
-            "_controller" => "Plugins",
-            "_action" => "all"
-        ]);
-        $plugins
+        // -----------
+        $routes[] = RouteFactory::makeRoute('/plugins/', PluginsController::class, 'all')
             ->setTitle("Список плагинов")
-            ->setIcon('fa-plug');
-        $routes[] = $index;
+            ->setIcon("fa-plug");
+
+        $routes[] = RouteFactory::makeRoute('/plugins/edit/', PluginsController::class, 'edit')
+            ->setVisible(false);
+
 
         return $routes;
 

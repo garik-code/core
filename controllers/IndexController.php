@@ -1,8 +1,8 @@
 <?php namespace Kitrix\Core;
 
-use Kitrix\Entities\Admin\KitrixController;
+use Kitrix\Entities\Admin\Controller;
 
-class IndexController extends KitrixController
+class IndexController extends Controller
 {
     /**
      * About page

@@ -3,7 +3,7 @@
 use Kitrix\Common\Kitx;
 use Kitrix\Common\SingletonClass;
 use const Kitrix\DS;
-use Kitrix\Entities\Admin\KitrixController;
+use Kitrix\Entities\Admin\Controller;
 use Kitrix\Entities\Admin\Route as KitrixRoute;
 use Kitrix\Plugins\Plugin;
 use Kitrix\Plugins\PluginsManager;
@@ -33,7 +33,7 @@ final class Router
     const DEFAULT_CONTROLLERS_DIRECTORY = 'controllers';
 
     /** @var string - All controller should extend this parent class */
-    const DEFAULT_CONTROLLER_METHOD_PARENT = 'Kitrix\Entities\Admin\KitrixController';
+    const DEFAULT_CONTROLLER_METHOD_PARENT = 'Kitrix\Entities\Admin\Controller';
 
     /** @var string */
     private $currentUrlFull;
@@ -49,6 +49,12 @@ final class Router
 
     /** @var UrlGenerator */
     private $urlGenerator;
+
+    /** @var RouteCollection */
+    private $routes;
+
+    /** @var array - known routes like this [kitrix_core_plugins, kitrix_config_tab_edit] */
+    private $knownPaths = [];
 
     /** @var bool */
     private $isInitialized = false;
@@ -87,7 +93,7 @@ final class Router
         // Generate routes
         // -----------
 
-        $routes = new RouteCollection();
+        $this->routes = new RouteCollection();
 
         $pluginsManager = PluginsManager::getInstance();
         foreach ($pluginsManager->getLoadedPlugins() as $plugin) {
@@ -111,17 +117,18 @@ final class Router
                 $defaults[self::ROUTE_KITRIX_ID] = $plugin->getClassName();
 
                 // build
-                $routes->add($name, new Route($path, $defaults, [], [
+                $this->routes->add($name, new Route($path, $defaults, [], [
                     'utf8' => true
                 ]));
+                $this->knownPaths[] = $name;
             }
         }
 
         // Match route
         // -----------
 
-        $matcher = new UrlMatcher($routes, $context);
-        $this->urlGenerator = new UrlGenerator($routes, $context);
+        $matcher = new UrlMatcher($this->routes, $context);
+        $this->urlGenerator = new UrlGenerator($this->routes, $context);
 
         //check
         try
@@ -182,10 +189,27 @@ final class Router
      * @param $path
      * @param array $params
      * @return string
+     * @throws \Exception
      */
     public function generateLinkTo($path, $params = []) {
 
-        $urlPath = $this->urlGenerator->generate($path, $params);
+        try
+        {
+            $urlPath = $this->urlGenerator->generate($path, $params);
+        }
+        catch (\Exception $e) {
+
+            $routes = $this->routes->all();
+
+            throw new \Exception(Kitx::frmt("
+                %s -- 
+                Route '%s' not found.
+                Exist routes list: '%s'
+                ", [$e->getMessage(), $path, implode(", ", $this->knownPaths)]
+            ));
+
+        }
+
         $urlPath = urldecode($urlPath);
         return $urlPath;
     }
@@ -359,83 +383,86 @@ final class Router
             }
 
             // ---------------------------------------------------
-            // validate view
-            // ---------------------------------------------------
-
-            // ex. /var/www/project/../kitrix.core/views
-            $viewsPath =
-                $plugin->getLocalDirectory() .
-                DS .
-                KitrixController::TEMPLATE_ROOT;
-
-            $viewsControllerPath =
-                $viewsPath .
-                DS .
-                $currentPage['_controller'];
-
-            $viewPath =
-                $viewsControllerPath .
-                DS .
-                $controllerAction . "." .
-                KitrixController::TEMPLATE_EXT;
-
-            if (!is_dir($viewsPath)) {
-                throw new \Exception(Kitx::frmt(
-                    "Can't load kitrix controller '%s' for plugin '%s'. 
-                    Views folder in plugin not exist. Please make folder '%s' and try again",
-                    [
-                        $currentPage['_controller'],
-                        $plugin->getClassPath(),
-                        $viewsPath,
-                    ]
-                ));
-            }
-
-            if (!is_dir($viewsControllerPath)) {
-                throw new \Exception(Kitx::frmt(
-                    "Can't load kitrix controller '%s' for plugin '%s'. 
-                    Views folder for controller not exist. Please make folder '%s' and try again",
-                    [
-                        $currentPage['_controller'],
-                        $plugin->getClassPath(),
-                        $viewsControllerPath,
-                    ]
-                ));
-            }
-
-            if (!is_file($viewPath)) {
-                throw new \Exception(Kitx::frmt(
-                    "Can't load kitrix controller '%s->%s()' for plugin '%s'. 
-                    View for action '%s' not found. Please make file '%s' and try again",
-                    [
-                        $currentPage['_controller'],
-                        $controllerAction,
-                        $plugin->getClassPath(),
-                        $controllerAction,
-                        $viewPath
-                    ]
-                ));
-            }
-
-            // ---------------------------------------------------
             // execute controller
             // ---------------------------------------------------
 
-            /** @var KitrixController $controller */
+            /** @var Controller $controller */
             $controller = new $controllerName($context);
 
-            if ($controller) {
-
-                // for bitrix admin classes, we need to force include lib
-                \CJSCore::Init(['jquery']);
-                require_once($_SERVER['DOCUMENT_ROOT'] . "/bitrix/modules/main/interface/admin_lib.php");
-
-            }
-
             /** @noinspection PhpUndefinedVariableInspection */
-            $controller->$controllerAction(...array_values($routeVars));
+            $return = $controller->$controllerAction(...array_values($routeVars));
 
-            $this->renderedTemplate  = $controller->render($viewsControllerPath, $controllerAction);
+            if (null === $return)
+            {
+                // if no return provided, we can suggest this is base view
+
+                // ---------------------------------------------------
+                // validate view
+                // ---------------------------------------------------
+
+                // ex. /var/www/project/../kitrix.core/views
+                $viewsPath =
+                    $plugin->getLocalDirectory() .
+                    DS .
+                    Controller::TEMPLATE_ROOT;
+
+                $viewsControllerPath =
+                    $viewsPath .
+                    DS .
+                    $currentPage['_controller'];
+
+                $viewPath =
+                    $viewsControllerPath .
+                    DS .
+                    $controllerAction . "." .
+                    Controller::TEMPLATE_EXT;
+
+                if (!is_dir($viewsPath)) {
+                    throw new \Exception(Kitx::frmt(
+                        "Can't load kitrix controller '%s' for plugin '%s'. 
+                    Views folder in plugin not exist. Please make folder '%s' and try again",
+                        [
+                            $currentPage['_controller'],
+                            $plugin->getClassPath(),
+                            $viewsPath,
+                        ]
+                    ));
+                }
+
+                if (!is_dir($viewsControllerPath)) {
+                    throw new \Exception(Kitx::frmt(
+                        "Can't load kitrix controller '%s' for plugin '%s'. 
+                    Views folder for controller not exist. Please make folder '%s' and try again",
+                        [
+                            $currentPage['_controller'],
+                            $plugin->getClassPath(),
+                            $viewsControllerPath,
+                        ]
+                    ));
+                }
+
+                if (!is_file($viewPath)) {
+                    throw new \Exception(Kitx::frmt(
+                        "Can't load kitrix controller '%s->%s()' for plugin '%s'. 
+                    View for action '%s' not found. Please make file '%s' and try again",
+                        [
+                            $currentPage['_controller'],
+                            $controllerAction,
+                            $plugin->getClassPath(),
+                            $controllerAction,
+                            $viewPath
+                        ]
+                    ));
+                }
+
+
+                $this->renderedTemplate  = $controller->render($viewsControllerPath, $controllerAction);
+            }
+            else
+            {
+                // return 200 OK with return data
+                $controller->ok($return);
+            }
         }
 
         return false;

@@ -119,10 +119,12 @@ class Route
      * ex "fa-bolt"
      *
      * @param string $icon
+     * @return $this
      */
     public function setIcon(string $icon)
     {
         $this->icon = $icon;
+        return $this;
     }
 
 

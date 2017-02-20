@@ -3,7 +3,7 @@
 use Bitrix\Main\EventManager;
 use Bitrix\Main\Page\Asset;
 use Kitrix\Common\InjectException;
-use const Kitrix\DS;
+use Kitrix\Common\Kitx;
 use Kitrix\Entities\Router;
 use Kitrix\Plugins\PluginsManager;
 
@@ -20,62 +20,45 @@ echo \Kitrix\Load::getInstance()->adminEntryPoint();
     public function injectIntoBitrix() {
 
         $this
-            ->injectPublicScripts()
+            ->injectAssets()
             ->injectAdminMenu()
             ->injectKitrixEntryPoint();
     }
 
-    private function injectPublicScripts() {
+    private function injectAssets() {
 
-        /** @var \CMain $APPLICATION */
         global $APPLICATION;
 
-        $core = PluginsManager::getInstance()->getPluginByPID('kitrix/core');
-        if (!$core) {
-            return $this;
-        }
+        // load jq in admin panel
+        \CJSCore::Init(['jquery']);
 
-        $stylesRoot =
-            $core->getLocalDirectory() . DS .
-            "public" . DS . "styles";
+        $projectRoot = realpath($_SERVER['DOCUMENT_ROOT']);
 
-        $scriptsRoot =
-            $core->getLocalDirectory() . DS .
-            "public" . DS . "js";
+        foreach (PluginsManager::getInstance()->getLoadedPlugins() as $plugin) {
+            foreach ($plugin->registerAssets() as $asset) {
 
-        $vendorRoot =
-            $core->getLocalDirectory() . DS .
-            "public" . DS . "vendor";
+                $absPath = $plugin->getLocalDirectory() .
+                    DIRECTORY_SEPARATOR .
+                    "public" .
+                    $asset->getRelName();
 
-        // boot kitrix styles
-        $styles = [
-            $vendorRoot .
-                DS . "font-awesome-4.7.0" .
-                DS . "css" .
-                DS . "font-awesome.min.css",
+                if (!is_file($absPath)) {
+                    throw new \Exception(Kitx::frmt("
+                        Asset file '%s' not found. File is exist?
+                    ", [$absPath]));
+                }
 
-            $stylesRoot . DS . "admin.css"
-        ];
+                $relativeAssetPath = str_replace($projectRoot, '', $absPath);
 
-        $scripts = [
-            $scriptsRoot . DS . "KitrixCorePlugins.js"
-        ];
+                if ($asset->getType() === \Kitrix\Entities\Asset::JS) {
+                    Asset::getInstance()->addJs($relativeAssetPath);
+                }
 
-        foreach ($styles as $style) {
+                if ($asset->getType() === \Kitrix\Entities\Asset::CSS) {
+                    $APPLICATION->SetAdditionalCSS($relativeAssetPath);
+                }
 
-            $projectRoot = realpath($_SERVER['DOCUMENT_ROOT']);
-
-            $style = str_replace($projectRoot, '', $style);
-            $APPLICATION->SetAdditionalCSS($style);
-        }
-
-        foreach ($scripts as $script) {
-
-            $projectRoot = realpath($_SERVER['DOCUMENT_ROOT']);
-
-            $script = str_replace($projectRoot, '', $script);
-            Asset::getInstance()->addJs($script);
-
+            }
         }
 
         return $this;
@@ -106,7 +89,14 @@ echo \Kitrix\Load::getInstance()->adminEntryPoint();
             foreach ($plugins->getLoadedPlugins() as $plugin)
             {
                 ++$plCount;
-                $routes = $plugin->registerRoutes();
+                $adminRoutes = $plugin->registerRoutes();
+                $routes = [];
+
+                foreach ($adminRoutes as $adminRoute) {
+                    if ($adminRoute->isVisible()) {
+                        $routes[] = $adminRoute;
+                    }
+                }
 
                 if (null !== $routes && count($routes) >= 1)
                 {
@@ -179,6 +169,9 @@ echo \Kitrix\Load::getInstance()->adminEntryPoint();
     }
 
     private function injectKitrixEntryPoint() {
+
+        // for bitrix admin classes, we need to force include lib
+        require_once($_SERVER['DOCUMENT_ROOT'] . "/bitrix/modules/main/interface/admin_lib.php");
 
         // install kitrix entry point to admin panel
         $entryPoint = $_SERVER["DOCUMENT_ROOT"]."/bitrix/admin/" . Router::KITRIX_ENTRY_POINT;

@@ -1,10 +1,9 @@
 <?php namespace Kitrix\Core;
 
-use Kitrix\Common\Kitx;
-use Kitrix\Entities\Admin\KitrixController;
+use Kitrix\Entities\Admin\Controller;
 use Kitrix\Plugins\PluginsManager;
 
-class PluginsController extends KitrixController
+class PluginsController extends Controller
 {
     public function all()
     {
@@ -19,15 +18,20 @@ class PluginsController extends KitrixController
         $this->set('plugins', $plugins);
     }
 
-    private function disable($id) {
-        Kitx::pr($id);
-    }
+    public function edit() {
 
-    private function enable($id) {
-        Kitx::pr($id);
-    }
+        $validStatuses = ['disable', 'enable', 'remove'];
+        $req = $this->getContext()->getRequest();
+        $status = $req['status'];
 
-    private function remove($id) {
-        Kitx::pr($id);
+        if (!$status) {
+            $this->not_found();
+        }
+
+        if (!in_array($status, $validStatuses)) {
+            $this->halt(vsprintf("Invalid status '%s'", [$status]));
+        }
+
+        return array('json' => 'yey');
     }
 }

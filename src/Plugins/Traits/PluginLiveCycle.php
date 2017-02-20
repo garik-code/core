@@ -2,9 +2,25 @@
 
 use Kitrix\Entities\Admin\MenuItem;
 use Kitrix\Entities\Admin\Route;
+use Kitrix\Entities\Asset;
 
 trait PluginLiveCycle
 {
+    /**
+     * Register custom assets (css/js) for
+     * auto loading
+     *
+     * You should specify relative path for
+     * public directory in your plugin:
+     *
+     * ex. "/css/some.css"
+     *
+     * for file "/plugin/public/css/some.css"
+     *
+     * @return Asset[]
+     */
+    abstract public function registerAssets() : array;
+
     /**
      * Register custom plugin menu items
      * in admin panel

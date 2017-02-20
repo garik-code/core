@@ -100,6 +100,7 @@ class Load
             }
             catch (\Exception $e)
             {
+                Kitx::logBootError($e);
                 $halt = true;
             }
         }

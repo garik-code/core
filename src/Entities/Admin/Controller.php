@@ -1,10 +1,13 @@
 <?php namespace Kitrix\Entities\Admin;
 
+use Kitrix\Entities\Admin\Traits\ControllerResponse;
 use Kitrix\Entities\Context;
 use League\Plates\Engine;
 
-class KitrixController
+class Controller
 {
+
+    use ControllerResponse;
 
     /** Name of root templates directory in plugin */
     const TEMPLATE_ROOT = "views";

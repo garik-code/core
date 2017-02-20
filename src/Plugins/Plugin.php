@@ -2,6 +2,7 @@
 
 use Kitrix\Entities\Admin\MenuItem;
 use Kitrix\Entities\Admin\Route;
+use Kitrix\Entities\Asset;
 use Kitrix\Plugins\Traits\PluginLiveCycle;
 
 class Plugin
@@ -145,6 +146,24 @@ class Plugin
     }
 
     /**
+     * Register custom assets (css/js) for
+     * auto loading
+     *
+     * You should specify relative path for
+     * public directory in your plugin:
+     *
+     * ex. "/css/some.css"
+     *
+     * for file "/plugin/public/css/some.css"
+     *
+     * @return Asset[]
+     */
+    public function registerAssets(): array
+    {
+        return [];
+    }
+
+    /**
      * Register custom plugin menu items
      * in admin panel
      *
@@ -178,6 +197,5 @@ class Plugin
     {
         return;
     }
-
 
 }
