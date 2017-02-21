@@ -191,6 +191,21 @@ class Plugin
         return [];
     }
 
+
+    /**
+     * !FOR INTERNAL USE ONLY!
+     *
+     * Disable plugin (without side effects, and events)
+     * Do not use this directly,
+     * use PluginsManager->disablePlugin() instead
+     *
+     * @internal
+     */
+    public function __disable()
+    {
+        $this->disabled = false;
+    }
+
     /** =========== PROTECTED STAFF ============================================= */
 
     public final function __invoke()
@@ -198,4 +213,38 @@ class Plugin
         return;
     }
 
+    /**
+     * This function run automatic, before plugin
+     * going to disable state
+     *
+     * You can't directly cancel disabling, but
+     * allow to run some side functions like
+     * (clear cache, unregister callbacks, destroy
+     * entities, etc..)
+     *
+     * @return void
+     */
+    public function onDisableBefore()
+    {
+
+    }
+
+    /**
+     * This function run automatic, after plugin
+     * state changed to disable.
+     *
+     * At this moment plugin will be unmount and
+     * unloaded from kitrix.
+     *
+     * You can't directly cancel disabling, but
+     * allow to run some side functions like
+     * (clear cache, unregister callbacks, destroy
+     * entities, etc..)
+     *
+     * @return void
+     */
+    public function onDisableAfter()
+    {
+
+    }
 }

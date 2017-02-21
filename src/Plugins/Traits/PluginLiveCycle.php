@@ -42,4 +42,34 @@ trait PluginLiveCycle
      * @return Route[]
      */
     abstract public function registerRoutes() : array;
+
+    /**
+     * This function run automatic, before plugin
+     * going to disable state
+     *
+     * You can't directly cancel disabling, but
+     * allow to run some side functions like
+     * (clear cache, unregister callbacks, destroy
+     * entities, etc..)
+     *
+     * @return void
+     */
+    abstract public function onDisableBefore();
+
+    /**
+     * This function run automatic, after plugin
+     * state changed to disable.
+     *
+     * At this moment plugin will be unmount and
+     * unloaded from kitrix.
+     *
+     * You can't directly cancel disabling, but
+     * allow to run some side functions like
+     * (clear cache, unregister callbacks, destroy
+     * entities, etc..)
+     *
+     * @return void
+     */
+    abstract public function onDisableAfter();
+
 }

@@ -21,12 +21,17 @@ class PluginsController extends Controller
 
     public function edit() {
 
+        // list of protected plugins, user can't interact with this:
+        $protectedPluginPIDs = ['kitrix/core'];
         $validStatuses = ['disable', 'enable', 'remove'];
+
+        // get request
         $req = $this->getContext()->getRequest();
 
         $status = $req['action'];
         $pluginCode = $req['pid'];
 
+        // check request
         if (!$status or !$pluginCode) {
             $this->not_found();
         }
@@ -35,9 +40,17 @@ class PluginsController extends Controller
             $this->halt(Kitx::frmt("Invalid status '%s'", [$status]));
         }
 
-        $plugin = PluginsManager::getInstance()->getPluginByPID($pluginCode);
+        // load plugins
+        $pluginsManager = PluginsManager::getInstance();
+
+        $plugin = $pluginsManager->getPluginByPID($pluginCode);
         if (!$plugin) {
             $this->halt(Kitx::frmt("Unknown plugin '%s'", [$pluginCode]));
+        }
+
+        // Do not touch core!
+        if (in_array($plugin->getId(), $protectedPluginPIDs)) {
+            $this->halt(Kitx::frmt("Plugin '%s' is protected. You cannot apply any method on him.", [$pluginCode]));
         }
 
         // Common checks
@@ -58,8 +71,31 @@ class PluginsController extends Controller
             ", [$pluginCode]));
         }
 
+        // Find other plugins, who required current plugin
+        $requiredPluginListIds = [];
+
+        foreach ($pluginsManager->getLoadedPlugins() as $loadedPlugin) {
+
+            $deps = array_keys($loadedPlugin->getConfig()->getDependencies());
+            if (in_array($plugin->getId(), $deps)) {
+
+                $requiredPluginListIds[] = $loadedPlugin->getId();
+            }
+        }
+
+        if (count($requiredPluginListIds) && in_array($status, ['disable', 'remove'])) {
+            $this->halt(Kitx::frmt("
+                Can't disable or remove plugin '%s', because other plugins
+                depend on this plugin functional. First disable this plugins: '%s'
+            ", [$pluginCode, implode(', ', $requiredPluginListIds)]));
+        }
+
         // Disable
         // =================
+        if ($status === 'disable')
+        {
+            $pluginsManager->disablePlugin($plugin);
+        }
 
         // Enable
         // =================

@@ -440,6 +440,20 @@ final class PluginsManager
         return $this->registeredPlugins;
     }
 
+    /**
+     * @param Plugin $plugin
+     */
+    public function disablePlugin(Plugin $plugin)
+    {
+        $plugin->onDisableBefore();
+
+        /** @noinspection PhpInternalEntityUsedInspection */
+        $plugin->__disable();
+
+        $plugin->onDisableAfter();
+
+        unset($this->registeredPlugins[$plugin->getId()]);
+    }
 
     /**
      * Get dependencies status for plugin
