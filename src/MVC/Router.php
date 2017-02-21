@@ -1,10 +1,10 @@
-<?php namespace Kitrix\Entities;
+<?php namespace Kitrix\MVC;
 
 use Kitrix\Common\Kitx;
 use Kitrix\Common\SingletonClass;
-use const Kitrix\DS;
-use Kitrix\Entities\Admin\Controller;
-use Kitrix\Entities\Admin\Route as KitrixRoute;
+use Kitrix\MVC\Admin\Controller;
+use Kitrix\MVC\Admin\Route as KitrixRoute;
+use Kitrix\MVC\Context as KitrixContext;
 use Kitrix\Plugins\Plugin;
 use Kitrix\Plugins\PluginsManager;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
@@ -33,7 +33,7 @@ final class Router
     const DEFAULT_CONTROLLERS_DIRECTORY = 'controllers';
 
     /** @var string - All controller should extend this parent class */
-    const DEFAULT_CONTROLLER_METHOD_PARENT = 'Kitrix\Entities\Admin\Controller';
+    const DEFAULT_CONTROLLER_METHOD_PARENT = 'Kitrix\MVC\Admin\Controller';
 
     /** @var string */
     private $currentUrlFull;
@@ -82,7 +82,7 @@ final class Router
             $currentUrl = '/';
         }
 
-        $this->currentUrlFull = $currentUrl;
+        $this->currentUrlFull = $this->buildUrlWrapper($currentUrl);
 
         // Build router
         // -----------
@@ -105,11 +105,8 @@ final class Router
                 $name = $this->getRouteName($plugin, $route);
 
                 // fetch route path
-                $path = self::BASE_URL . "/";
-                $path .= self::KITRIX_ENTRY_POINT . "?to=" . "/";
-                $path .= $plugin->getVendorName() . "/" . $plugin->getClassName();
-                $path .= $route->getAction() . "/";
-                $path = strtolower($path);
+                $path = $plugin->getVendorName() . "/" . $plugin->getClassName() . $route->getAction() . "/";
+                $path = $this->buildUrlWrapper($path);
 
                 // fetch route defaults
                 $defaults = $route->getDefaults();
@@ -199,8 +196,6 @@ final class Router
         }
         catch (\Exception $e) {
 
-            $routes = $this->routes->all();
-
             throw new \Exception(Kitx::frmt("
                 %s -- 
                 Route '%s' not found.
@@ -223,7 +218,7 @@ final class Router
      */
     public function getRouteName(Plugin $plugin, KitrixRoute $adminRoute) {
 
-        $name = $plugin->getUnderScoredName();
+        $name = $plugin->getUnderscoredName();
         $name .= $adminRoute->getAction();
         $name = str_replace('/', '_', $name);
 
@@ -274,7 +269,7 @@ final class Router
                 return false;
             }
 
-            $context = new Context($routeVars, $plugin);
+            $context = new KitrixContext($routeVars, $plugin);
 
             // ---------------------------------------------------
             // find controller
@@ -286,13 +281,13 @@ final class Router
             // ex. /var/www/project/../kitrix.core/controllers
             $controllersPath =
                 $plugin->getLocalDirectory() .
-                DS .
+                DIRECTORY_SEPARATOR .
                 self::DEFAULT_CONTROLLERS_DIRECTORY;
 
             // ex. /var/www/project/../kitrix.core/controllers/BooksController.php
             $controllerFile =
                 $controllersPath .
-                DS .
+                DIRECTORY_SEPARATOR .
                 $className . '.php';
 
             // ex. \Kitrix\Core\BooksController
@@ -403,17 +398,17 @@ final class Router
                 // ex. /var/www/project/../kitrix.core/views
                 $viewsPath =
                     $plugin->getLocalDirectory() .
-                    DS .
+                    DIRECTORY_SEPARATOR .
                     Controller::TEMPLATE_ROOT;
 
                 $viewsControllerPath =
                     $viewsPath .
-                    DS .
+                    DIRECTORY_SEPARATOR .
                     $currentPage['_controller'];
 
                 $viewPath =
                     $viewsControllerPath .
-                    DS .
+                    DIRECTORY_SEPARATOR .
                     $controllerAction . "." .
                     Controller::TEMPLATE_EXT;
 
@@ -466,5 +461,21 @@ final class Router
         }
 
         return false;
+    }
+
+    /**
+     * Wrap 'to' url with bitrix entry point
+     *
+     * @param $toUrl
+     * @return string
+     */
+    private function buildUrlWrapper($toUrl) {
+
+        $path = self::BASE_URL . "/";
+        $path .= self::KITRIX_ENTRY_POINT . "?to=";
+        $path .= $toUrl;
+        $path = strtolower($path);
+
+        return $path;
     }
 }

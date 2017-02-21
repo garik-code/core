@@ -4,7 +4,7 @@ use Bitrix\Main\EventManager;
 use Bitrix\Main\Page\Asset;
 use Kitrix\Common\InjectException;
 use Kitrix\Common\Kitx;
-use Kitrix\Entities\Router;
+use Kitrix\MVC\Router;
 use Kitrix\Plugins\PluginsManager;
 
 class BitrixAdmin
@@ -102,7 +102,7 @@ echo \Kitrix\Load::getInstance()->adminEntryPoint();
                 {
                     $pluginMenu = array(
                         'parent_menu' => 'global_menu_kitrix',
-                        'section' => $plugin->getUnderScoredName(),
+                        'section' => $plugin->getUnderscoredName(),
                         'text' => $plugin->getConfig()->getAlias(),
                         'icon' => $this->getFAIcon($plugin->getConfig()->getIcon()),
                         'sort' => self::CustomMenuOrder + ($plCount*200),
@@ -122,7 +122,7 @@ echo \Kitrix\Load::getInstance()->adminEntryPoint();
 
                         ++$menuCount;
                         $pluginMenu['items'][] = array(
-                            'parent_menu' => $plugin->getUnderScoredName(),
+                            'parent_menu' => $plugin->getUnderscoredName(),
                             'text' => $adminRoute->getTitle(),
                             'icon' => $this->getFAIcon($adminRoute->getIcon()),
                             'url' => $routeUrl,

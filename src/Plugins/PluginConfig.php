@@ -1,7 +1,6 @@
 <?php namespace Kitrix\Plugins;
 
 use Kitrix\Common\Kitx;
-use const Kitrix\DS;
 
 final class PluginConfig
 {
@@ -146,7 +145,7 @@ final class PluginConfig
      */
     public static function validateConfig(PluginMeta &$metaPlugin) {
 
-        $composerFile = $metaPlugin->getDirectory()->getRealPath() . DS . "composer.json";
+        $composerFile = $metaPlugin->getDirectory()->getRealPath() . DIRECTORY_SEPARATOR . "composer.json";
         $data = self::loadComposerConfig($composerFile);
 
         @$isKitrixPlugin = (bool)$data['extra']['isKitrixPlugin'] ?: false;

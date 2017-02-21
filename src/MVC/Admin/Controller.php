@@ -1,7 +1,7 @@
-<?php namespace Kitrix\Entities\Admin;
+<?php namespace Kitrix\MVC\Admin;
 
-use Kitrix\Entities\Admin\Traits\ControllerResponse;
-use Kitrix\Entities\Context;
+use Kitrix\MVC\Admin\Traits\ControllerResponse;
+use Kitrix\MVC\Context;
 use League\Plates\Engine;
 
 class Controller

@@ -162,7 +162,7 @@ $adminTable->CheckListMode();
         ];
     }
 
-    $router = \Kitrix\Entities\Router::getInstance();
+    $router = \Kitrix\MVC\Router::getInstance();
 
     $jsParams = json_encode([
         'url' => $router->generateLinkTo('kitrix_core_plugins_edit'),

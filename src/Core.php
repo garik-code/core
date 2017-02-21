@@ -2,11 +2,11 @@
 
 use Kitrix\Core\IndexController;
 use Kitrix\Core\PluginsController;
-use Kitrix\Entities\Admin\RouteFactory;
+use Kitrix\MVC\Admin\RouteFactory;
 use Kitrix\Entities\Asset;
 use Kitrix\Plugins\Plugin;
 
-class Core extends Plugin
+final class Core extends Plugin
 {
     public function registerAssets(): array
     {

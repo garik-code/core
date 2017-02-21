@@ -1,7 +1,7 @@
 <?php namespace Kitrix\Plugins\Traits;
 
 use Kitrix\Entities\Admin\MenuItem;
-use Kitrix\Entities\Admin\Route;
+use Kitrix\MVC\Admin\Route;
 use Kitrix\Entities\Asset;
 
 trait PluginLiveCycle

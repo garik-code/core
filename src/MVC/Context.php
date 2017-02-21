@@ -1,8 +1,8 @@
-<?php namespace Kitrix\Entities;
+<?php namespace Kitrix\MVC;
 
 use Kitrix\Plugins\Plugin;
 
-class Context
+final class Context
 {
     /** @var array */
     private $routeVars = [];

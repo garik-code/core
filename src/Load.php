@@ -3,7 +3,7 @@
 use Bitrix\Main\Config\Configuration;
 use Kitrix\Common\Kitx;
 use Kitrix\Common\SingletonClass;
-use Kitrix\Entities\Router;
+use Kitrix\MVC\Router;
 use Kitrix\Hooks\BitrixAdmin;
 use Kitrix\Plugins\PluginsManager;
 use Whoops\Handler\PrettyPageHandler;
@@ -11,7 +11,7 @@ use Whoops\Run;
 
 const DS = DIRECTORY_SEPARATOR;
 
-class Load
+final class Load
 {
     const KITRIX_ROOT_PATH = "local" . DS . "kitrix";
     const KITRIX_PLUGINS_PATH = self::KITRIX_ROOT_PATH . DS . "plugins";
@@ -56,7 +56,7 @@ class Load
 
             // Build url router
             $this->router = Router::getInstance();
-            $this->router->prepare($_SERVER['REQUEST_URI']);
+            $this->router->prepare($_REQUEST['to'] ?: "/");
 
             // Inject into Kitrix
             $bitrixHook = new BitrixAdmin();

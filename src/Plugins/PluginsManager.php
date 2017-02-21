@@ -3,7 +3,6 @@
 use Kitrix\Common\Kitx;
 use Kitrix\Common\NotKitrixPluginException;
 use Kitrix\Common\SingletonClass;
-use const Kitrix\DS;
 use Kitrix\Entities\InternalDB;
 use Kitrix\Load;
 
@@ -94,7 +93,7 @@ final class PluginsManager
 
         foreach ($locationsToSearch as $relPath) {
 
-            $searchIn = $basePath . DS . trim($relPath, DS);
+            $searchIn = $basePath . DIRECTORY_SEPARATOR . trim($relPath, DIRECTORY_SEPARATOR);
             if (!is_dir($searchIn)) {
                 continue;
             }
@@ -286,7 +285,7 @@ final class PluginsManager
                     continue;
                 }
 
-                if (!is_file($subItem->getRealPath() . DS . "composer.json")) {
+                if (!is_file($subItem->getRealPath() . DIRECTORY_SEPARATOR . "composer.json")) {
                     continue;
                 }
 
@@ -318,9 +317,9 @@ final class PluginsManager
             // load
             $loadScript =
                 $metaPlugin->getDirectory()->getRealPath() .
-                DS .
+                DIRECTORY_SEPARATOR .
                 "vendor" .
-                DS .
+                DIRECTORY_SEPARATOR .
                 "autoload.php";
 
             // load local kitrix plugin
@@ -382,11 +381,11 @@ final class PluginsManager
         $metaPlugins = $this->getMetaPluginsList();
 
         // Build external requirements map of available libs
-        $externalLibs = $this->findLibFoldersInPath($_SERVER['DOCUMENT_ROOT'] . DS . "vendor");
+        $externalLibs = $this->findLibFoldersInPath($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . "vendor");
 
         foreach ($metaPlugins as $metaPlugin) {
 
-            $vendorDir = $metaPlugin->getDirectory()->getRealPath() . DS . "vendor";
+            $vendorDir = $metaPlugin->getDirectory()->getRealPath() . DIRECTORY_SEPARATOR . "vendor";
             $externalLibs += $this->findLibFoldersInPath($vendorDir);
         }
 

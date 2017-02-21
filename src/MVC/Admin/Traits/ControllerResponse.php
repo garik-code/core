@@ -1,4 +1,4 @@
-<?php namespace Kitrix\Entities\Admin\Traits;
+<?php namespace Kitrix\MVC\Admin\Traits;
 
 const STATUS_OK = 200;
 const STATUS_REDIRECT = 301;

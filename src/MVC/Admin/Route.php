@@ -1,6 +1,6 @@
-<?php namespace Kitrix\Entities\Admin;
+<?php namespace Kitrix\MVC\Admin;
 
-class Route
+final class Route
 {
     /** @var string */
     private $action = "index";

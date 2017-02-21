@@ -1,7 +1,6 @@
 <?php namespace Kitrix\Common;
 
 use Bitrix\Main\Config\Configuration;
-use const Kitrix\DS;
 
 final class Kitx
 {
@@ -43,7 +42,7 @@ final class Kitx
             $isDebugMode = true;
         }
 
-        $logFile = $_SERVER['DOCUMENT_ROOT'] . DS . "__KITRIX_BOOT_LOG_HALT.txt";
+        $logFile = $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . "__KITRIX_BOOT_LOG_HALT.txt";
 
         if (!$isDebugMode) {
             return false;

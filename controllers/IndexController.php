@@ -1,6 +1,6 @@
 <?php namespace Kitrix\Core;
 
-use Kitrix\Entities\Admin\Controller;
+use Kitrix\MVC\Admin\Controller;
 
 class IndexController extends Controller
 {

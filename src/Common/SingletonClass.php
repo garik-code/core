@@ -14,6 +14,8 @@ trait SingletonClass
         $this->init();
     }
     protected function init() {}
+
+
     final private function __wakeup() {}
     final private function __clone() {}
 }

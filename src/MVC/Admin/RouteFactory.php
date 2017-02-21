@@ -1,6 +1,6 @@
-<?php namespace Kitrix\Entities\Admin;
+<?php namespace Kitrix\MVC\Admin;
 
-use Kitrix\Common\Kitx;
+use Kitrix\MVC\Router;
 
 final class RouteFactory
 {
@@ -11,9 +11,12 @@ final class RouteFactory
      * @param $url
      * @param $controller
      * @param string $method
+     * @param array $defParams
      * @return Route
      */
-    public static function makeRoute($url, $controller, $method = "index") {
+    public static function makeRoute($url, $controller, $method = "index", $defParams = []) {
+
+        $defParams = (array)$defParams;
 
         // we can provide class name directly
         // ex. $controller = 'IndexController::class'
@@ -26,8 +29,13 @@ final class RouteFactory
             $controller = str_replace('Controller', '', $controller);
         }
 
+        $clearDefParams = ['_controller', '_action', Router::ROUTE_KITRIX_NAMESPACE, Router::ROUTE_KITRIX_ID];
+        foreach ($clearDefParams as $k) {
+            unset($defParams[$k]);
+        }
+
         // default params
-        $params = [
+        $params = $defParams + [
             "_controller" => $controller,
         ];
 

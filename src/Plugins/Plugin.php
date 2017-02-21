@@ -1,7 +1,7 @@
 <?php namespace Kitrix\Plugins;
 
 use Kitrix\Entities\Admin\MenuItem;
-use Kitrix\Entities\Admin\Route;
+use Kitrix\MVC\Admin\Route;
 use Kitrix\Entities\Asset;
 use Kitrix\Plugins\Traits\PluginLiveCycle;
 

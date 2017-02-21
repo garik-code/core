@@ -1,7 +1,6 @@
 <?php namespace Kitrix\Entities;
 use Kitrix\Common\Kitx;
 use Kitrix\Common\SingletonClass;
-use const Kitrix\DS;
 use Kitrix\Load;
 
 /**
@@ -94,7 +93,7 @@ final class InternalDB
      * @return string
      */
     public final function getDBPath() {
-        return $_SERVER['DOCUMENT_ROOT'] . DS . self::DB_PATH;
+        return $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . self::DB_PATH;
     }
 
     /**
@@ -114,7 +113,7 @@ final class InternalDB
             return false;
         }
 
-        $hpcPath = $this->getDBPath() . DS . $name . ".json";
+        $hpcPath = $this->getDBPath() . DIRECTORY_SEPARATOR . $name . ".json";
         if (is_file($hpcPath)) {
             return false;
         }
