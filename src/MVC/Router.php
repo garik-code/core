@@ -385,7 +385,17 @@ final class Router
             $controller = new $controllerName($context);
 
             /** @noinspection PhpUndefinedVariableInspection */
-            $return = $controller->$controllerAction(...array_values($routeVars));
+            $error = false;
+            $return = null;
+
+            try
+            {
+                $return = $controller->$controllerAction(...array_values($routeVars));
+            }
+            catch (\Exception $e)
+            {
+                $error = $e->getMessage();
+            }
 
             if (null === $return)
             {
@@ -451,11 +461,16 @@ final class Router
                 }
 
 
-                $this->renderedTemplate  = $controller->render($viewsControllerPath, $controllerAction);
+                $this->renderedTemplate = $error ?: $controller->render($viewsControllerPath, $controllerAction);
             }
             else
             {
                 // return 200 OK with return data
+                if ($error)
+                {
+                    $controller->halt($error);
+                }
+
                 $controller->ok($return);
             }
         }

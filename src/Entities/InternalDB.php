@@ -92,7 +92,7 @@ final class InternalDB
      * Get absolute path to HPC DB
      * @return string
      */
-    public final function getDBPath() {
+    public function getDBPath() {
         return $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . self::DB_PATH;
     }
 
@@ -107,21 +107,55 @@ final class InternalDB
      * @return bool
      * @throws \Exception
      */
-    public final function registerDB($name, $defaultStruct) {
+    public function registerDB($name, $defaultStruct) {
 
         if (in_array($name, array_keys($this->store))) {
             return false;
         }
 
-        $hpcPath = $this->getDBPath() . DIRECTORY_SEPARATOR . $name . ".json";
+        $hpcPath = $this->getDBPathByName($name);
+
         if (is_file($hpcPath)) {
             return false;
         }
 
+        return $this->writeDB($name, $defaultStruct);
+    }
+
+    /**
+     * Return hpc from store, or false if hpc not exist
+     *
+     * @param $name
+     * @return bool|mixed
+     */
+    public function getDB($name) {
+        if (!in_array($name, array_keys($this->store))) {
+            return false;
+        }
+
+        return $this->store[$name];
+    }
+
+    /**
+     * Write store to database file
+     *
+     * @param $name
+     * @param $data
+     * @return bool
+     * @throws \Exception
+     */
+    public function writeDB($name, $data)
+    {
+        if (!in_array($name, array_keys($this->store))) {
+            return false;
+        }
+
+        $hpcPath = $this->getDBPathByName($name);
+
         try
         {
-            file_put_contents($hpcPath, json_encode($defaultStruct, JSON_PRETTY_PRINT));
-            $this->store[$name] = $defaultStruct;
+            file_put_contents($hpcPath, json_encode($data, JSON_PRETTY_PRINT));
+            $this->store[$name] = $data;
         }
         catch (\Exception $e) {
             throw new \Exception(vsprintf("
@@ -132,21 +166,18 @@ final class InternalDB
         return true;
     }
 
+    /** =============== Internal ================== */
+
     /**
-     * Return hpc from store, or false if hpc not exist
+     * Return absolute file path by name
      *
      * @param $name
-     * @return bool|mixed
+     * @return string
      */
-    public final function getDB($name) {
-        if (!in_array($name, array_keys($this->store))) {
-            return false;
-        }
-
-        return $this->store[$name];
+    private function getDBPathByName($name)
+    {
+        return $this->getDBPath() . DIRECTORY_SEPARATOR . $name . ".json";
     }
-
-    /** =============== Internal ================== */
 
 
 }

@@ -10,7 +10,9 @@
     KitrixCorePlugins.params = null;
 
     function KitrixCorePlugins() {
-      this.params = KitrixCorePluginsParams;
+      if (typeof KitrixCorePluginsParams !== "undefined" && KitrixCorePluginsParams !== null) {
+        this.params = KitrixCorePluginsParams;
+      }
       return;
     }
 
@@ -20,7 +22,17 @@
       @param id - PID of plugin (kitrix/core)
      */
 
-    KitrixCorePlugins.prototype.enable = function(id) {};
+    KitrixCorePlugins.prototype.enable = function(id) {
+      var plugin;
+      plugin = this.params.plugins[id];
+      this.sRequest('enable', {
+        pid: id
+      }, function(isSuccess, response) {
+        if (isSuccess) {
+          alertify.success("Плагин " + plugin.title + " включен!");
+        }
+      });
+    };
 
 
     /*
@@ -39,7 +51,6 @@
             if (isSuccess) {
               alertify.success("Плагин " + plugin.title + " отключен!");
             }
-            console.log(response);
           });
         };
       })(this));

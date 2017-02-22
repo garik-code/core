@@ -39,12 +39,6 @@ final class PluginsManager
         }
         $this->isInitialized = true;
 
-        // Mark manager
-        if ($this->initialized) {
-            return;
-        }
-        $this->initialized = true;
-
         // get disable status of plugins
         $this->disabledPIDs = $this->getDisabledPlugins();
 
@@ -129,10 +123,6 @@ final class PluginsManager
                 $plugName = $item->getFilename();
                 $plugId = $vendor . "/" . $plugName;
 
-                if (in_array($plugId, $disabledPIDs)) {
-                    continue;
-                }
-
                 if (!$item->isDir()) {
                     continue;
                 }
@@ -159,6 +149,11 @@ final class PluginsManager
 
                 if (!$pluginMeta) {
                     continue;
+                }
+
+
+                if (in_array($pluginMeta->getPid(), $disabledPIDs)) {
+                    $pluginMeta->disable();
                 }
 
                 $pluginFoldersFound[$plugId] = $pluginMeta;
@@ -441,7 +436,10 @@ final class PluginsManager
     }
 
     /**
+     * Disable kitrix plugin
+     *
      * @param Plugin $plugin
+     * @return bool
      */
     public function disablePlugin(Plugin $plugin)
     {
@@ -449,10 +447,37 @@ final class PluginsManager
 
         /** @noinspection PhpInternalEntityUsedInspection */
         $plugin->__disable();
-
         $plugin->onDisableAfter();
 
+        $store = InternalDB::getInstance();
+
+        $disabledPids = (array)$store->getDB(InternalDB::DB_PLUG_DISABLED_PIDS);
+        $disabledPids[] = $plugin->getId();
+        $status = $store->writeDB(InternalDB::DB_PLUG_DISABLED_PIDS, $disabledPids);
+
         unset($this->registeredPlugins[$plugin->getId()]);
+
+        return $status;
+    }
+
+    /**
+     * Enable kitrix plugin (by meta ref)
+     *
+     * @param PluginMeta $pluginMeta
+     * @return bool
+     */
+    public function enablePlugin(PluginMeta $pluginMeta)
+    {
+        $store = InternalDB::getInstance();
+        $disabledPids = (array)$store->getDB(InternalDB::DB_PLUG_DISABLED_PIDS);
+        $_id = array_search($pluginMeta->getPid(), $disabledPids);
+
+        if ($_id !== false)
+        {
+            unset($disabledPids[$_id]);
+        }
+
+        return $store->writeDB(InternalDB::DB_PLUG_DISABLED_PIDS, $disabledPids);
     }
 
     /**
@@ -487,12 +512,12 @@ final class PluginsManager
 
                     $_refPlugin = $plugins[$dep];
                     if ($_refPlugin->isDisabled()) {
-                        $status[$dep] = true;
+                        $status[$dep] = false;
                         continue;
                     }
                 }
 
-                $status[$dep] = false;
+                $status[$dep] = true;
             }
         }
 

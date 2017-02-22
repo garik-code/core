@@ -6,7 +6,8 @@ class KitrixCorePlugins
 
   constructor: ->
 
-    @params = KitrixCorePluginsParams;
+    if KitrixCorePluginsParams?
+      @params = KitrixCorePluginsParams
     return
 
   ###
@@ -14,6 +15,18 @@ class KitrixCorePlugins
     @param id - PID of plugin (kitrix/core)
   ###
   enable: (id) ->
+
+    plugin = @params.plugins[id]
+
+    @sRequest 'enable', {
+      pid: id
+    }, (isSuccess, response) ->
+
+      if (isSuccess)
+        alertify.success "Плагин #{plugin.title} включен!"
+
+      # update table
+      return
 
     return
 
@@ -23,7 +36,7 @@ class KitrixCorePlugins
   ###
   disable: (id) ->
 
-    plugin = @params.plugins[id];
+    plugin = @params.plugins[id]
 
     alertify.confirm "Вы действительно хотите выключить плагин #{plugin.title}?
       Вы сможете включить его позже, все данные/файлы созданные плагином останутся.
@@ -38,7 +51,6 @@ class KitrixCorePlugins
           alertify.success "Плагин #{plugin.title} отключен!"
 
         # update table
-        console.log response
         return
 
     return

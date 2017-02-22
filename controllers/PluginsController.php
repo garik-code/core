@@ -23,51 +23,55 @@ class PluginsController extends Controller
 
         // list of protected plugins, user can't interact with this:
         $protectedPluginPIDs = ['kitrix/core'];
-        $validStatuses = ['disable', 'enable', 'remove'];
+        $validActions = ['disable', 'enable', 'remove'];
 
         // get request
         $req = $this->getContext()->getRequest();
 
-        $status = $req['action'];
+        $action = $req['action'];
         $pluginCode = $req['pid'];
 
         // check request
-        if (!$status or !$pluginCode) {
+        if (!$action or !$pluginCode) {
             $this->not_found();
         }
 
-        if (!in_array($status, $validStatuses)) {
-            $this->halt(Kitx::frmt("Invalid status '%s'", [$status]));
+        if (!in_array($action, $validActions)) {
+            $this->halt(Kitx::frmt("Неизвестное действие '%s'", [$action]));
         }
 
         // load plugins
         $pluginsManager = PluginsManager::getInstance();
+        $metaList = $pluginsManager->getMetaPluginsList();
 
-        $plugin = $pluginsManager->getPluginByPID($pluginCode);
-        if (!$plugin) {
-            $this->halt(Kitx::frmt("Unknown plugin '%s'", [$pluginCode]));
+        if (!$metaList[$pluginCode]) {
+            $this->halt(Kitx::frmt("Плагин '%s' не найден", [$pluginCode]));
         }
 
+        $pluginMeta = $metaList[$pluginCode];
+
         // Do not touch core!
-        if (in_array($plugin->getId(), $protectedPluginPIDs)) {
-            $this->halt(Kitx::frmt("Plugin '%s' is protected. You cannot apply any method on him.", [$pluginCode]));
+        if (in_array($pluginMeta->getPid(), $protectedPluginPIDs)) {
+            $this->halt(Kitx::frmt("
+                Плагин '%s' защишен от воздействия. Вы не можете выполнить это действие!
+            ", [$pluginCode]));
         }
 
         // Common checks
         // =================
 
-        if ($status === 'disable' && $plugin->isDisabled()) {
-            $this->halt(Kitx::frmt("plugin '%s' already disabled!", [$pluginCode]));
+        if ($action === 'disable' && $pluginMeta->isDisabled()) {
+            $this->halt(Kitx::frmt("Плагин '%s' уже отключен!", [$pluginCode]));
         }
 
-        if ($status === 'enable' && !$plugin->isDisabled()) {
-            $this->halt(Kitx::frmt("plugin '%s' already enabled!", [$pluginCode]));
+        if ($action === 'enable' && !$pluginMeta->isDisabled()) {
+            $this->halt(Kitx::frmt("Плагин '%s' уже включен!", [$pluginCode]));
         }
 
-        if ($status === 'remove' && !$plugin->isDisabled()) {
+        if ($action === 'remove' && !$pluginMeta->isDisabled()) {
             $this->halt(Kitx::frmt("
-                Can't delete plugin '%s', because plugin is enabled now! 
-                First disable plugin and all dependencies.
+                Невозможно удалить плагин '%s', так как он включен.
+                Сначала выключите плагин, а также все зависимые от него плагины (если такие есть)
             ", [$pluginCode]));
         }
 
@@ -77,28 +81,33 @@ class PluginsController extends Controller
         foreach ($pluginsManager->getLoadedPlugins() as $loadedPlugin) {
 
             $deps = array_keys($loadedPlugin->getConfig()->getDependencies());
-            if (in_array($plugin->getId(), $deps)) {
+            if (in_array($pluginMeta->getPid(), $deps)) {
 
                 $requiredPluginListIds[] = $loadedPlugin->getId();
             }
         }
 
-        if (count($requiredPluginListIds) && in_array($status, ['disable', 'remove'])) {
+        if (count($requiredPluginListIds) && in_array($action, ['disable', 'remove'])) {
             $this->halt(Kitx::frmt("
-                Can't disable or remove plugin '%s', because other plugins
-                depend on this plugin functional. First disable this plugins: '%s'
+                Нельзя отключить или удалить плагин '%s', так как другие kitrix
+                плагины используют его API, сначала следует выключить эти плагины: '%s'
             ", [$pluginCode, implode(', ', $requiredPluginListIds)]));
         }
 
         // Disable
         // =================
-        if ($status === 'disable')
+        if ($action === 'disable')
         {
+            $plugin = $pluginsManager->getPluginByPID($pluginMeta->getPid());
             $pluginsManager->disablePlugin($plugin);
         }
 
         // Enable
         // =================
+        if ($action === 'enable')
+        {
+            $pluginsManager->enablePlugin($pluginMeta);
+        }
 
         // Remove
         // =================
