@@ -98,6 +98,15 @@ echo \Kitrix\Load::getInstance()->adminEntryPoint();
                     }
                 }
 
+                $sort = self::CustomMenuOrder + ($plCount*200);
+                if ($plugin->getVendorName() === 'Kitrix') {
+                    $sort = 0;
+                }
+
+                if ($plugin->getClassName() === 'Core') {
+                    $sort -= 5000;
+                }
+
                 if (null !== $routes && count($routes) >= 1)
                 {
                     $pluginMenu = array(
@@ -105,7 +114,7 @@ echo \Kitrix\Load::getInstance()->adminEntryPoint();
                         'section' => $plugin->getUnderscoredName(),
                         'text' => $plugin->getConfig()->getAlias(),
                         'icon' => $this->getFAIcon($plugin->getConfig()->getIcon()),
-                        'sort' => self::CustomMenuOrder + ($plCount*200),
+                        'sort' => $sort,
                         'items_id' => 'menu_'.$plugin->getHash(),
                         'items' => array(),
                     );

@@ -29,21 +29,20 @@
      */
 
     KitrixCorePlugins.prototype.disable = function(id) {
-      var allow, plugin;
+      var plugin;
       plugin = this.params.plugins[id];
-      allow = confirm("Вы действительно хотите выключить плагин " + plugin.title + "? Вы сможете включить его позже, все данные/файлы созданные плагином останутся. Если вы использовали API плагина, оно станет недоступно.");
-      if (!allow) {
-        return;
-      }
-      this.sRequest('disable', {
-        pid: id
-      }, function(isSuccess, response) {
-        if (!isSuccess) {
-          alert("Не удалось отключить плагин " + plugin.title + "!");
-          return;
-        }
-        console.log("updated!", response);
-      });
+      alertify.confirm("Вы действительно хотите выключить плагин " + plugin.title + "? Вы сможете включить его позже, все данные/файлы созданные плагином останутся. Если вы использовали API плагина, оно станет недоступно.", (function(_this) {
+        return function() {
+          return _this.sRequest('disable', {
+            pid: id
+          }, function(isSuccess, response) {
+            if (isSuccess) {
+              alertify.success("Плагин " + plugin.title + " отключен!");
+            }
+            console.log(response);
+          });
+        };
+      })(this));
     };
 
 
@@ -55,22 +54,33 @@
     KitrixCorePlugins.prototype.remove = function(id) {};
 
     KitrixCorePlugins.prototype.sRequest = function(action, data, callback) {
+      var checkResponseClosure;
       if (data == null) {
         data = {};
       }
       if (callback == null) {
         callback = null;
       }
+      checkResponseClosure = function(success, r) {
+        if (success == null) {
+          success = false;
+        }
+        console.log(r, r.msg);
+        if ((r != null) && (r.error != null)) {
+          alertify.error(r.msg);
+        }
+        callback(success, r);
+      };
       $.ajax({
         url: this.params.url,
         data: $.extend({
           action: action
         }, data),
         success: function(r) {
-          return callback(true, r);
+          return checkResponseClosure(true, JSON.parse(r));
         },
         error: function(r) {
-          return callback(false, r);
+          return checkResponseClosure(false, JSON.parse(r.responseText));
         }
       });
     };

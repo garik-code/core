@@ -12,8 +12,11 @@ final class Core extends Plugin
     {
         return [
             new Asset('/styles/admin.css', Asset::CSS),
+            new Asset('/js/KitrixCorePlugins.js', Asset::JS),
+
+            new Asset('/vendor/notify/alertify.min.js', Asset::JS),
+            new Asset('/vendor/notify/css/alertify.css', Asset::CSS),
             new Asset('/vendor/font-awesome-4.7.0/css/font-awesome.min.css', Asset::CSS),
-            new Asset('/js/KitrixCorePlugins.js', Asset::JS)
         ];
     }
 

@@ -51,7 +51,7 @@ trait ControllerResponse
     public function halt($error = "Internal Server Error") {
         $this->response([
             'error' => true,
-            'explain' => $error
+            'msg' => $error
         ], STATUS_INTERNAL_ERROR);
     }
 

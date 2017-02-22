@@ -24,27 +24,22 @@ class KitrixCorePlugins
   disable: (id) ->
 
     plugin = @params.plugins[id];
-    allow = confirm("
-      Вы действительно хотите выключить плагин #{plugin.title}?
+
+    alertify.confirm "Вы действительно хотите выключить плагин #{plugin.title}?
       Вы сможете включить его позже, все данные/файлы созданные плагином останутся.
-      Если вы использовали API плагина, оно станет недоступно.
-    ")
+      Если вы использовали API плагина, оно станет недоступно."
+    , =>
 
-    return unless allow
+      @sRequest 'disable', {
+        pid: id
+      }, (isSuccess, response) ->
 
-    @sRequest 'disable', {
-      pid: id
-    }, (isSuccess, response) ->
+        if (isSuccess)
+          alertify.success "Плагин #{plugin.title} отключен!"
 
-      if (!isSuccess)
-
-        alert("Не удалось отключить плагин #{plugin.title}!")
+        # update table
+        console.log response
         return
-
-      # update table
-      console.log "updated!", response
-
-      return
 
     return
 
@@ -58,14 +53,23 @@ class KitrixCorePlugins
 
   sRequest: (action, data = {}, callback = null) ->
 
+    checkResponseClosure = (success = false, r) ->
+
+      console.log r, r.msg
+      if (r? and r.error?)
+        alertify.error r.msg
+
+      callback success, r
+      return
+
     $.ajax {
       url: @params.url
       data: $.extend({
         action: action
       }, data)
 
-      success: (r) -> callback yes, r
-      error: (r) -> callback no, r
+      success: (r) -> checkResponseClosure yes, JSON.parse(r)
+      error: (r) -> checkResponseClosure no, JSON.parse(r.responseText)
     }
 
     return
