@@ -24,6 +24,9 @@ class Plugin
     /** @var bool */
     private $disabled = false;
 
+    /** @var bool */
+    private $installed = false;
+
     /** @var PluginConfig */
     private $config;
 
@@ -38,6 +41,7 @@ class Plugin
         $this->className = $meta->getName();
         $this->localDirectory = $meta->getDirectory()->getRealPath();
         $this->disabled = !!$meta->isDisabled();
+        $this->installed = !!$meta->isInstalled();
         $this->config = $meta->getConfig();
 
         if (!$this->isDisabled()) {
@@ -95,6 +99,16 @@ class Plugin
     public final function isDisabled(): bool
     {
         return $this->disabled;
+    }
+
+    /**
+     * Plugin is installed?
+     *
+     * @return bool
+     */
+    public final function isInstalled(): bool
+    {
+        return $this->installed;
     }
 
     /**
@@ -191,28 +205,6 @@ class Plugin
         return [];
     }
 
-
-    /**
-     * !FOR INTERNAL USE ONLY!
-     *
-     * Disable plugin (without side effects, and events)
-     * Do not use this directly,
-     * use PluginsManager->disablePlugin() instead
-     *
-     * @internal
-     */
-    public function __disable()
-    {
-        $this->disabled = false;
-    }
-
-    /** =========== PROTECTED STAFF ============================================= */
-
-    public final function __invoke()
-    {
-        return;
-    }
-
     /**
      * This function run automatic, before plugin
      * going to disable state
@@ -246,5 +238,82 @@ class Plugin
     public function onDisableAfter()
     {
 
+    }
+
+    /**
+     * This function run only once, when kitrix
+     * first time install this plugin
+     *
+     * At this moment you can create databasese,
+     * prepare files, move components, etc..
+     *
+     * All this staff will be run only once!
+     *
+     * Kitrix will try to catch exceptions,
+     * if script throw some error, kitrix
+     * skip other install process and return
+     * error to user. In this situation,
+     * plugin will not be installed
+     */
+    public static function onInstall()
+    {
+
+    }
+
+    /**
+     * At this moment, you can cancel uninstall
+     * and return some message to user with
+     * explanation reason.
+     *
+     * return true - for allow uninstall
+     * return otherwise - for block uninstall process
+     *
+     * you can specify explanation message, for this
+     * simple throw Exception with some message
+     *
+     * @return bool
+     */
+    public static function onBeforeUninstall(): bool
+    {
+        return true;
+    }
+
+    /**
+     * This function run only once, when kitrix
+     * try to uninstall plugin.
+     *
+     * At this moment you can drop custom
+     * databases, remove plugin files,
+     * clear cache and do other staff like this.
+     *
+     * You cannot stop or cancel this process,
+     * use onBeforeUninstall, for block/cancel
+     * uninstall process
+     */
+    public static function onUninstall()
+    {
+
+    }
+
+
+    /** =========== PROTECTED STAFF ============================================= */
+
+    public final function __invoke()
+    {
+        return;
+    }
+
+    /**
+     * !FOR INTERNAL USE ONLY!
+     *
+     * Disable plugin (without side effects, and events)
+     * Do not use this directly,
+     * use PluginsManager->disablePlugin() instead
+     *
+     * @internal
+     */
+    public function __disable()
+    {
+        $this->disabled = false;
     }
 }

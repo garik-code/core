@@ -56,12 +56,47 @@ class KitrixCorePlugins
     return
 
   ###
-    Remove plugin by ID with full data drop (+files unlink, +composer remove)
+    Uninstall plugin
     @param id - PID of plugin (kitrix/core)
   ###
-  remove: (id) ->
+  uninstall: (id) ->
+
+    plugin = @params.plugins[id]
+
+    alertify.confirm "Вы действительно хотите ДЕИНСТАЛИРОВАТЬ плагин #{plugin.title}?
+      Физически плагин останется в системе, но вся информация об этом плагине
+      будет очищена (все данные будут стерты, кеш очищен, файлы и компоненты созданные
+      плагином будут удалены). При этом ВЫ МОЖЕТЕ ЗАНОВО УСТАНОВИТЬ плагин позже."
+    , =>
+
+      @sRequest 'uninstall', {
+        pid: id
+      }, (isSuccess, response) ->
+
+        if (isSuccess)
+          alertify.success "Плагин #{plugin.title} деинсталирован!"
+
+        # update table
+        return
 
     return
+
+  ###
+    Install plugin
+    @param id - PID of plugin (kitrix/core)
+  ###
+  install: (id) ->
+
+    plugin = @params.plugins[id]
+    @sRequest 'install', {
+      pid: id
+    }, (isSuccess, response) ->
+
+      if (isSuccess)
+        alertify.success "Плагин #{plugin.title} установлен!"
+
+      # update table
+      return
 
   sRequest: (action, data = {}, callback = null) ->
 

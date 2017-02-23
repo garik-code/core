@@ -23,6 +23,9 @@ final class PluginMeta
     /** @var bool */
     private $isDisabled = false;
 
+    /** @var bool */
+    private $isInstalled = false;
+
     function __construct(\DirectoryIterator $realDirectory, $vendor)
     {
         if (!is_dir($realDirectory->getRealPath())) {
@@ -55,6 +58,14 @@ final class PluginMeta
      */
     public function enable() {
         $this->isDisabled = false;
+    }
+
+    /**
+     * @param bool $isInstalled
+     */
+    public function setIsInstalled(bool $isInstalled)
+    {
+        $this->isInstalled = $isInstalled;
     }
 
     /**
@@ -103,6 +114,14 @@ final class PluginMeta
     public function isDisabled(): bool
     {
         return $this->isDisabled;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInstalled(): bool
+    {
+        return $this->isInstalled;
     }
 
     /**

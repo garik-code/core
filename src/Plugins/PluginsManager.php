@@ -14,11 +14,11 @@ final class PluginsManager
     const CORE_PLUGIN_ID = "kitrix/core";
     const VALID_FACADE = "Kitrix\\Plugins\\Plugin";
 
-    /** @var bool - manager is initialized? */
-    private $initialized = false;
-
     /** @var array - array of disabled plugin PIDS */
     private $disabledPIDs = [];
+
+    /** @var array - array of installed plugin PIDS */
+    private $installedPIDs = [];
 
     /** @var Plugin[] - collection of registered active plugins in system */
     private $registeredPlugins = [];
@@ -26,7 +26,7 @@ final class PluginsManager
     /** @var PluginMeta[] - collection of available plugins in system (only info)  */
     private $localPlugins = [];
 
-    /** @var bool */
+    /** @var bool - manager is initialized? */
     private $isInitialized = false;
 
     /**
@@ -41,9 +41,14 @@ final class PluginsManager
 
         // get disable status of plugins
         $this->disabledPIDs = $this->getDisabledPlugins();
+        $this->installedPIDs = $this->getInstalledPlugins();
 
         // Fetch plugins from various path's
-        $this->localPlugins = $this->getLocalPlugins(self::FIND_PATH, $this->disabledPIDs);
+        $this->localPlugins = $this->getLocalPlugins(
+            self::FIND_PATH,
+            $this->disabledPIDs,
+            $this->installedPIDs
+        );
 
         // Build dependencies tree
         $this->checkDependencies();
@@ -69,6 +74,23 @@ final class PluginsManager
     }
 
     /**
+     * Return installed plugins PID's list
+     * ex. ["kitrix/core", "kitrix/debug", ..]
+     *
+     * @return array
+     */
+    private function getInstalledPlugins(): array
+    {
+        // prepare db
+        $db = InternalDB::getInstance();
+        $db->registerDB(InternalDB::DB_PLUG_INSTALLED_PIDS, []);
+
+        // load values
+        $installed = (array)$db->getDB(InternalDB::DB_PLUG_INSTALLED_PIDS);
+        return $installed;
+    }
+
+    /**
      * Return all local plugins from system path
      * But not load them, all plugins info
      * will be stored to PluginMeta class
@@ -78,9 +100,10 @@ final class PluginsManager
      *
      * @param $locationsToSearch
      * @param array $disabledPIDs
-     * @return PluginMeta[]
+     * @param array $installedPIDs
+     * @return array|PluginMeta[]
      */
-    private function getLocalPlugins($locationsToSearch, $disabledPIDs = []): array {
+    private function getLocalPlugins($locationsToSearch, $disabledPIDs = [], $installedPIDs = []): array {
 
         $basePath = $_SERVER['DOCUMENT_ROOT'];
         $vendorsFound = [];
@@ -155,6 +178,8 @@ final class PluginsManager
                 if (in_array($pluginMeta->getPid(), $disabledPIDs)) {
                     $pluginMeta->disable();
                 }
+
+                $pluginMeta->setIsInstalled(in_array($pluginMeta->getPid(), $installedPIDs));
 
                 $pluginFoldersFound[$plugId] = $pluginMeta;
             }
@@ -305,46 +330,49 @@ final class PluginsManager
 
         foreach ($metaPlugins as $metaPlugin) {
 
+            if (!$metaPlugin->isInstalled()) {
+                continue;
+            }
+
             if ($metaPlugin->isDisabled()) {
                 continue;
             }
 
-            // load
-            $loadScript =
-                $metaPlugin->getDirectory()->getRealPath() .
-                DIRECTORY_SEPARATOR .
-                "vendor" .
-                DIRECTORY_SEPARATOR .
-                "autoload.php";
-
-            // load local kitrix plugin
-            if (is_file($loadScript)) {
-
-                /** @noinspection PhpIncludeInspection */
-                require_once($loadScript);
-            }
-
-            $nameSpace = $metaPlugin->getVendorName();
-            $className = $metaPlugin->getName();
-
-            $class = "\\{$nameSpace}\\{$className}";
-
-            // fix not core plugins
-            if (!($nameSpace === 'Kitrix' && $className === 'Core')) {
-                $class .= "\\{$className}";
-            }
-
-            if (!class_exists($class)) {
-                throw new \Exception(Kitx::frmt("
-                    Kitrix can't autoload plugin '%s', file 'vendor/autoload.php' is requiring in init code?
-                ", [
-                    $metaPlugin->getPid(),
-                    $loadScript
-                ]));
-            }
+            $class = $this->loadMetaPlugin($metaPlugin);
 
             /** @var Plugin $plugin */
             $plugin = new $class($metaPlugin);
+
+            // install plugin
+            // todo move install to user GUI
+//            $installError = false;
+//            if (!$metaPlugin->isInstalled())
+//            {
+//                try
+//                {
+//                    // install
+////                    $plugin->onInstall();
+////
+////                    // mark as installed
+////                    $db = InternalDB::getInstance();
+////                    $installed = (array)$db->getDB(InternalDB::DB_PLUG_INSTALLED_PIDS);
+////                    $installed[] = $plugin->getId();
+////                    $db->writeDB(InternalDB::DB_PLUG_INSTALLED_PIDS, $installed);
+//                }
+//                catch (\Exception $e)
+//                {
+//                    $installError = true;
+//                    Kitx::logBootError($e);
+//                }
+//            }
+//
+//            if ($installError)
+//            {
+//                unset($plugin);
+//                continue;
+//            }
+//
+//            $metaPlugin->setIsInstalled(true);
 
             // validate Facade
             $reflector = new \ReflectionClass($plugin);
@@ -385,6 +413,55 @@ final class PluginsManager
         }
 
         return $externalLibs;
+    }
+
+    /**
+     * Load meta plugin into memory
+     * after this, you can construct
+     * instance of plugin
+     *
+     * like '$plugin = new loadMetaPlugin($meta)'
+     *
+     * @param PluginMeta $pluginMeta
+     * @return string
+     * @throws \Exception
+     */
+    private function loadMetaPlugin(PluginMeta $pluginMeta)
+    {
+        $nameSpace = $pluginMeta->getVendorName();
+        $className = $pluginMeta->getName();
+
+        $class = "\\{$nameSpace}\\{$className}";
+
+        // fix not core plugins
+        if (!($nameSpace === 'Kitrix' && $className === 'Core')) {
+            $class .= "\\{$className}";
+        }
+
+        // load
+        $loadScript =
+            $pluginMeta->getDirectory()->getRealPath() .
+            DIRECTORY_SEPARATOR .
+            "vendor" .
+            DIRECTORY_SEPARATOR .
+            "autoload.php";
+
+        // load local kitrix plugin
+        if (is_file($loadScript)) {
+
+            /** @noinspection PhpIncludeInspection */
+            require_once($loadScript);
+        }
+
+        if (!class_exists($class)) {
+            throw new \Exception(Kitx::frmt("
+                    Kitrix can't autoload plugin '%s', file 'vendor/autoload.php' is requiring in init code?
+                ", [
+                $pluginMeta->getPid()
+            ]));
+        }
+
+        return $class;
     }
 
     /** =========== API ============================================= */
@@ -478,6 +555,134 @@ final class PluginsManager
         }
 
         return $store->writeDB(InternalDB::DB_PLUG_DISABLED_PIDS, $disabledPids);
+    }
+
+    /**
+     * Uninstall plugin (by meta ref)
+     *
+     * @param PluginMeta $pluginMeta
+     *
+     * return false if not allowed to uninstall
+     * return true - if plugin uninstalled
+     *
+     * @return bool
+     */
+    public function uninstallPlugin(PluginMeta $pluginMeta)
+    {
+        /** @var Plugin $staticPlugin */
+        $staticPlugin = null;
+
+        try
+        {
+            $staticPlugin = $this->loadMetaPlugin($pluginMeta);
+            $allow = $staticPlugin::onBeforeUninstall();
+
+            if (!$allow)
+            {
+                Kitx::logBootError(new \Exception(Kitx::frmt("
+                    Plugin '%s' cannot be uninstall. Plugin block
+                    this process by self internal method.
+                    
+                ", [$pluginMeta->getPid()])));
+                return false;
+            }
+        }
+        catch (\Exception $e)
+        {
+            // if method throw exception,
+            // we cancel uninstall process and log explanation
+            Kitx::logBootError(new \Exception(Kitx::frmt("
+            
+                Plugin '%s' cannot be uninstalled. Plugin block
+                this process by self internal method, with message: '%s'
+            
+            ", [$pluginMeta->getPid(), $e->getMessage()])));
+            return false;
+        }
+
+        // Uninstall is allowed:
+        // ---------------------
+
+        if (!is_null($staticPlugin))
+        {
+            try
+            {
+                // run uninstall script
+                $staticPlugin::onUninstall();
+
+                // mark as uninstalled
+                $store = InternalDB::getInstance();
+                $installedPIDs = (array)$store->getDB(InternalDB::DB_PLUG_INSTALLED_PIDS);
+                $_id = array_search($pluginMeta->getPid(), $installedPIDs);
+
+                if ($_id !== false)
+                {
+                    unset($installedPIDs[$_id]);
+                }
+
+                $store->writeDB(InternalDB::DB_PLUG_INSTALLED_PIDS, $installedPIDs);
+
+            }
+            catch (\Exception $e)
+            {
+                // uninstall cannot be canceled
+                // if error happens, we only log this
+                Kitx::logBootError($e);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public function installPlugin(PluginMeta $pluginMeta)
+    {
+        /** @var Plugin $staticPlugin */
+        $staticPlugin = null;
+
+        try
+        {
+            $staticPlugin = $this->loadMetaPlugin($pluginMeta);
+        }
+        catch (\Exception $e)
+        {
+            // if method throw exception,
+            // we cancel uninstall process and log explanation
+            Kitx::logBootError($e);
+            return false;
+        }
+
+        // Install
+        if (!is_null($staticPlugin))
+        {
+            $error = false;
+
+            try
+            {
+                // run install script
+                $staticPlugin::onInstall();
+            }
+            catch (\Exception $e)
+            {
+                $error = true;
+                Kitx::logBootError($e);
+            }
+
+            if ($error)
+            {
+                return false;
+            }
+
+            // mark as installed
+            $store = InternalDB::getInstance();
+            $installedPIDs = (array)$store->getDB(InternalDB::DB_PLUG_INSTALLED_PIDS);
+            $installedPIDs[] = $pluginMeta->getPid();
+            $store->writeDB(InternalDB::DB_PLUG_INSTALLED_PIDS, $installedPIDs);
+            return true;
+        }
+
+        return false;
     }
 
     /**

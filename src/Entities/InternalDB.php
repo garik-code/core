@@ -19,6 +19,7 @@ final class InternalDB
     const DB_PATH = Load::KITRIX_CONFIG_PATH;
 
     const DB_PLUG_DISABLED_PIDS = "plugins_disabled";
+    const DB_PLUG_INSTALLED_PIDS = "plugins_installed";
 
     /** @var array */
     private $store;
@@ -146,10 +147,6 @@ final class InternalDB
      */
     public function writeDB($name, $data)
     {
-        if (!in_array($name, array_keys($this->store))) {
-            return false;
-        }
-
         $hpcPath = $this->getDBPathByName($name);
 
         try

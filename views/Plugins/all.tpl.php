@@ -15,6 +15,11 @@ $adminTable->AddHeaders([
         "default" => true,
     ],
     [
+        "id" => "INSTALLED",
+        "content" => "Установлен?",
+        "default" => true,
+    ],
+    [
         "id" => "ENABLED",
         "content" => "Включен?",
         "default" => true,
@@ -67,6 +72,21 @@ foreach ($plugins as $plugin) {
     <?
     $_fAuthors = ob_get_clean();
 
+    // ============ INSTALLED? =============
+    ob_start();
+    ?>
+    <div class="ktrx-core-plugin-status <?=$plugin->isInstalled() ? "ktrx-core-enabled" : "ktrx-core-disabled"?>">
+        <?if($plugin->isInstalled()):?>
+            <span class="fa fa-check"></span>
+            Установлен
+        <?else:?>
+            <span class="fa fa-exclamation-circle"></span>
+            Не установлен
+        <?endif;?>
+    </div>
+    <?
+    $_fInstalled = ob_get_clean();
+
     // ============ ENABLED? =============
     ob_start();
     ?>
@@ -113,6 +133,7 @@ foreach ($plugins as $plugin) {
 
     $row->AddViewField("NAME", $_fName);
     $row->AddViewField("AUTHOR", $_fAuthors);
+    $row->AddViewField("INSTALLED", $_fInstalled);
     $row->AddViewField("ENABLED", $_fStatus);
     $row->AddViewField("REQUIREMENTS", $_fRequirements);
     $row->AddViewField("VERSION", $_fVersion);
@@ -129,12 +150,24 @@ foreach ($plugins as $plugin) {
             "ACTION" => "KitrixCorePlugins.enable(\"{$plugin->getPid()}\")",
         ];
 
-        $actions[] = [
-            "ICON" => "delete",
-            "DEFAULT" => true,
-            "TEXT" => "Удалить",
-            "ACTION" => "KitrixCorePlugins.remove(\"{$plugin->getPid()}\")",
-        ];
+        if ($plugin->isInstalled())
+        {
+            $actions[] = [
+                "ICON" => "delete",
+                "DEFAULT" => true,
+                "TEXT" => "Деинсталировать (только данные)",
+                "ACTION" => "KitrixCorePlugins.uninstall(\"{$plugin->getPid()}\")",
+            ];
+        }
+        else
+        {
+            $actions[] = [
+                "ICON" => "install",
+                "DEFAULT" => true,
+                "TEXT" => "Установить",
+                "ACTION" => "KitrixCorePlugins.install(\"{$plugin->getPid()}\")",
+            ];
+        }
     }
     else
     {

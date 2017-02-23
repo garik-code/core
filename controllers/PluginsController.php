@@ -23,7 +23,7 @@ class PluginsController extends Controller
 
         // list of protected plugins, user can't interact with this:
         $protectedPluginPIDs = ['kitrix/core'];
-        $validActions = ['disable', 'enable', 'remove'];
+        $validActions = ['disable', 'enable', 'uninstall', 'install'];
 
         // get request
         $req = $this->getContext()->getRequest();
@@ -68,9 +68,24 @@ class PluginsController extends Controller
             $this->halt(Kitx::frmt("Плагин '%s' уже включен!", [$pluginCode]));
         }
 
-        if ($action === 'remove' && !$pluginMeta->isDisabled()) {
+        if ($action === 'enable' && !$pluginMeta->isInstalled()) {
             $this->halt(Kitx::frmt("
-                Невозможно удалить плагин '%s', так как он включен.
+                Плагин '%s' не установлен, сначала необходимо 
+                его установить!
+            ", [$pluginCode]));
+        }
+
+        if ($action === 'uninstall' && !$pluginMeta->isInstalled()) {
+            $this->halt(Kitx::frmt("Плагин '%s' уже деинсталирован!", [$pluginCode]));
+        }
+
+        if ($action === 'install' && $pluginMeta->isInstalled()) {
+            $this->halt(Kitx::frmt("Плагин '%s' уже установлен!", [$pluginCode]));
+        }
+
+        if ($action === 'uninstall' && !$pluginMeta->isDisabled()) {
+            $this->halt(Kitx::frmt("
+                Невозможно деинсталировать плагин '%s', так как он включен.
                 Сначала выключите плагин, а также все зависимые от него плагины (если такие есть)
             ", [$pluginCode]));
         }
@@ -87,9 +102,9 @@ class PluginsController extends Controller
             }
         }
 
-        if (count($requiredPluginListIds) && in_array($action, ['disable', 'remove'])) {
+        if (count($requiredPluginListIds) && in_array($action, ['disable', 'uninstall'])) {
             $this->halt(Kitx::frmt("
-                Нельзя отключить или удалить плагин '%s', так как другие kitrix
+                Нельзя отключить или деинсталировать плагин '%s', так как другие kitrix
                 плагины используют его API, сначала следует выключить эти плагины: '%s'
             ", [$pluginCode, implode(', ', $requiredPluginListIds)]));
         }
@@ -109,8 +124,31 @@ class PluginsController extends Controller
             $pluginsManager->enablePlugin($pluginMeta);
         }
 
-        // Remove
+        // Uninstall
         // =================
+        if ($action === 'uninstall')
+        {
+            if (!$pluginsManager->uninstallPlugin($pluginMeta))
+            {
+                $this->halt(Kitx::frmt("
+                    Не удалось деинсталировать плагин '%s',
+                    смотрите подробнее в BOOT_LOG логе.. 
+                ", [$pluginCode]));
+            }
+        }
+
+        // Install
+        // =================
+        if ($action === 'install')
+        {
+            if (!$pluginsManager->installPlugin($pluginMeta))
+            {
+                $this->halt(Kitx::frmt("
+                    Не удалось установить плагин '%s',
+                    смотрите подробнее в BOOT_LOG логе.. 
+                ", [$pluginCode]));
+            }
+        }
 
         return array('json' => 'yey');
     }

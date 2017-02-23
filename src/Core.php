@@ -1,5 +1,6 @@
 <?php namespace Kitrix;
 
+use Kitrix\Common\Kitx;
 use Kitrix\Core\IndexController;
 use Kitrix\Core\PluginsController;
 use Kitrix\MVC\Admin\RouteFactory;
@@ -42,5 +43,15 @@ final class Core extends Plugin
 
         return $routes;
 
+    }
+    
+    public static function onBeforeUninstall(): bool
+    {
+        throw new \Exception(Kitx::frmt("
+            Ядро Kitrix не должно быть удалено таким образом.
+            Для полного удаления сначала отключите все плагины,
+            затем удалите все плагины, затем используйте команду
+            composer remove kitrix/core.
+        ", []));
     }
 }

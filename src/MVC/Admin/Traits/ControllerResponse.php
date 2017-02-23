@@ -14,7 +14,7 @@ trait ControllerResponse
      * @param $data
      * @param int $status
      */
-    private function response($data, $status = STATUS_OK) {
+    private final function response($data, $status = STATUS_OK) {
 
         ob_end_clean();
         http_response_code((int)$status);
@@ -28,7 +28,7 @@ trait ControllerResponse
      *
      * @param $data
      */
-    public function ok($data = null) {
+    public final function ok($data = null) {
         $this->response($data, STATUS_OK);
     }
 
@@ -38,7 +38,7 @@ trait ControllerResponse
      *
      * @param $data
      */
-    public function not_found($data = null) {
+    public final function not_found($data = null) {
         $this->response($data, STATUS_NOT_FOUND);
     }
 
@@ -48,7 +48,7 @@ trait ControllerResponse
      *
      * @param string $error
      */
-    public function halt($error = "Internal Server Error") {
+    public final function halt($error = "Internal Server Error") {
         $this->response([
             'error' => true,
             'msg' => $error
@@ -62,7 +62,7 @@ trait ControllerResponse
      * @param $url
      * @param $data
      */
-    public function redirect($data = null, $url = "/") {
+    public final function redirect($data = null, $url = "/") {
         $this->response($data, STATUS_REDIRECT);
     }
 

@@ -58,11 +58,43 @@
 
 
     /*
-      Remove plugin by ID with full data drop (+files unlink, +composer remove)
+      Uninstall plugin
       @param id - PID of plugin (kitrix/core)
      */
 
-    KitrixCorePlugins.prototype.remove = function(id) {};
+    KitrixCorePlugins.prototype.uninstall = function(id) {
+      var plugin;
+      plugin = this.params.plugins[id];
+      alertify.confirm("Вы действительно хотите ДЕИНСТАЛИРОВАТЬ плагин " + plugin.title + "? Физически плагин останется в системе, но вся информация об этом плагине будет очищена (все данные будут стерты, кеш очищен, файлы и компоненты созданные плагином будут удалены). При этом ВЫ МОЖЕТЕ ЗАНОВО УСТАНОВИТЬ плагин позже.", (function(_this) {
+        return function() {
+          return _this.sRequest('uninstall', {
+            pid: id
+          }, function(isSuccess, response) {
+            if (isSuccess) {
+              alertify.success("Плагин " + plugin.title + " деинсталирован!");
+            }
+          });
+        };
+      })(this));
+    };
+
+
+    /*
+      Install plugin
+      @param id - PID of plugin (kitrix/core)
+     */
+
+    KitrixCorePlugins.prototype.install = function(id) {
+      var plugin;
+      plugin = this.params.plugins[id];
+      return this.sRequest('install', {
+        pid: id
+      }, function(isSuccess, response) {
+        if (isSuccess) {
+          alertify.success("Плагин " + plugin.title + " установлен!");
+        }
+      });
+    };
 
     KitrixCorePlugins.prototype.sRequest = function(action, data, callback) {
       var checkResponseClosure;
