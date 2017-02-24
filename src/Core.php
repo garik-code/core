@@ -44,7 +44,7 @@ final class Core extends Plugin
         return $routes;
 
     }
-    
+
     public static function onBeforeUninstall(): bool
     {
         throw new \Exception(Kitx::frmt("
