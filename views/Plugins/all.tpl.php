@@ -47,6 +47,12 @@ foreach ($plugins as $plugin) {
     <b>
         <i class="fa <?=$plugin->getConfig()->getIcon()?>"></i>
         <?=$plugin->getConfig()->getAlias()?> (<?=$plugin->getPid()?>)
+        <?if($plugin->isProtected()):?>
+            <small style="color: #1952D3;">
+                <i class="fa fa-lock"></i>
+                Защишен
+            </small>
+        <?endif;?>
     </b><br/>
     <small>
         <?=$plugin->getConfig()->getDesc()?>

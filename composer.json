@@ -5,10 +5,10 @@
         "kitrixTitle": "KITRIX"
     },
     "name": "kitrix/core",
-    "description": "Core class for other kitrix plugins.",
+    "description": "Ядро kitrix. Предоставляет API для работы остальных плагинов",
     "type": "library",
     "license": "MIT",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "authors": [
         {
             "name": "Fe3dback",

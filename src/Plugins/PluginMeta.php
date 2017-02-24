@@ -26,6 +26,9 @@ final class PluginMeta
     /** @var bool */
     private $isInstalled = false;
 
+    /** @var bool  */
+    private $isProtected = false;
+
     function __construct(\DirectoryIterator $realDirectory, $vendor)
     {
         if (!is_dir($realDirectory->getRealPath())) {
@@ -125,6 +128,14 @@ final class PluginMeta
     }
 
     /**
+     * @return bool
+     */
+    public function isProtected(): bool
+    {
+        return $this->isProtected;
+    }
+
+    /**
      * @return array
      */
     public function getDependenciesStatus() {
@@ -155,6 +166,11 @@ final class PluginMeta
         $this->pid = $expectedPluginID;
         $this->name = $expectedPluginName;
         $this->vendorName = $expectedPluginNameSpace;
+
+        $protectedPluginPIDs = ['kitrix/core'];
+        if (in_array($this->pid, $protectedPluginPIDs)) {
+            $this->isProtected = true;
+        }
 
         // validate config
 

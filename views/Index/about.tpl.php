@@ -24,7 +24,7 @@
         </li>
         <li>
             вы можете использовать API других Kitrix плагинов в своих целях,
-            к примеру с помощью плагина \Kitrix\Config можно за минуту
+            к примеру с помощью плагина Kitrix\Config можно за минуту
             вынести все настройки вашего плагина в админ панель
             (все настройки Kitrix плагинов располагаются в одном месте,
             централизованно в отличии от хаоса который творится в битриксе)
@@ -43,7 +43,7 @@
     </p>
 
     <p>
-        <a href="https://github.com/fe3dback/kitrix-dev" target="_blank">https://github.com/fe3dback/kitrix-dev</a>
+        <a href="https://github.com/kitrix-org/core" target="_blank">https://github.com/kitrix-org/core</a>
         <br />Konstantin <<a href="mailto:fe3dback@yandex.ru">fe3dback@yandex.ru</a>>
     </p>
 

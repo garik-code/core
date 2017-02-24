@@ -22,7 +22,6 @@ class PluginsController extends Controller
     public function edit() {
 
         // list of protected plugins, user can't interact with this:
-        $protectedPluginPIDs = ['kitrix/core'];
         $validActions = ['disable', 'enable', 'uninstall', 'install'];
 
         // get request
@@ -51,7 +50,7 @@ class PluginsController extends Controller
         $pluginMeta = $metaList[$pluginCode];
 
         // Do not touch core!
-        if (in_array($pluginMeta->getPid(), $protectedPluginPIDs)) {
+        if ($pluginMeta->isProtected()) {
             $this->halt(Kitx::frmt("
                 Плагин '%s' защишен от воздействия. Вы не можете выполнить это действие!
             ", [$pluginCode]));
