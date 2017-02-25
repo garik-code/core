@@ -16,6 +16,8 @@ use Bitrix\Main\Config\Configuration;
 
 final class Kitx
 {
+    static private $debugMode = null;
+
     /**
      * Return formatted Exception to throw
      *
@@ -41,6 +43,19 @@ final class Kitx
         die("<pre>".print_r($data, true)."</pre>");
     }
 
+    static function fire($data) {
+
+        $logData = print_r($data, true) . "\n\n";
+        $logFile = $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . "__kitrix_debug_log.txt";
+
+        if (!self::getDebugMode()) {
+            return false;
+        }
+
+        file_put_contents($logFile, $logData, FILE_APPEND);
+        return true;
+    }
+
     /**
      * Log high priority boot errors to log
      * @param \Exception $e
@@ -48,15 +63,9 @@ final class Kitx
      */
     static function logBootError(\Exception $e) {
 
-        $isDebugMode = false;
-        $exceptionHandling = Configuration::getValue("exception_handling");
-        if (is_array($exceptionHandling) && $exceptionHandling['debug']) {
-            $isDebugMode = true;
-        }
-
         $logFile = $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . "__KITRIX_BOOT_LOG_HALT.txt";
 
-        if (!$isDebugMode) {
+        if (!self::getDebugMode()) {
             return false;
         }
 
@@ -81,5 +90,24 @@ Trace:
         file_put_contents($logFile, $msg, FILE_APPEND);
 
         return true;
+    }
+
+    /**
+     * Check we are in debug mode?
+     * @return bool
+     */
+    static function getDebugMode()
+    {
+        if (self::$debugMode !== null) {
+            return self::$debugMode;
+        }
+
+        self::$debugMode = false;
+        $exceptionHandling = Configuration::getValue("exception_handling");
+        if (is_array($exceptionHandling) && $exceptionHandling['debug']) {
+            self::$debugMode = true;
+        }
+
+        return self::$debugMode;
     }
 }
