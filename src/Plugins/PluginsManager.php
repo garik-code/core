@@ -1,4 +1,16 @@
-<?php namespace Kitrix\Plugins;
+<?php
+/******************************************************************************
+ * Copyright (c) 2017. Kitrix Team                                            *
+ * Kitrix is open source project, available under MIT license.                *
+ *                                                                            *
+ * @author: Konstantin Perov <fe3dback@yandex.ru>                             *
+ * Documentation:                                                             *
+ * @see https://kitrix-org.github.io/docs                                     *
+ *                                                                            *
+ *                                                                            *
+ ******************************************************************************/
+
+namespace Kitrix\Plugins;
 
 use Kitrix\Common\Kitx;
 use Kitrix\Common\NotKitrixPluginException;
@@ -174,12 +186,19 @@ final class PluginsManager
                     continue;
                 }
 
+                $isInstalled = (
+                    in_array($pluginMeta->getPid(), $installedPIDs) or
+                    ($pluginMeta->getPid() === self::CORE_PLUGIN_ID)
+                );
 
-                if (in_array($pluginMeta->getPid(), $disabledPIDs)) {
+                $isDisabled = (in_array($pluginMeta->getPid(), $disabledPIDs) or !$isInstalled);
+
+                // update state
+
+                $pluginMeta->setIsInstalled($isInstalled);
+                if ($isDisabled) {
                     $pluginMeta->disable();
                 }
-
-                $pluginMeta->setIsInstalled(in_array($pluginMeta->getPid(), $installedPIDs));
 
                 $pluginFoldersFound[$plugId] = $pluginMeta;
             }
@@ -213,7 +232,7 @@ final class PluginsManager
 
                 unset($pidsForChecking[$metaPlugin->getPid()]);
 
-                if ($metaPlugin->isDisabled()) {
+                if ($metaPlugin->isDisabled() or !$metaPlugin->isInstalled()) {
                     continue;
                 }
 
@@ -252,7 +271,7 @@ final class PluginsManager
                     // if lib disabled
                     $depPlugin = $metaPlugins[$depPid];
 
-                    if ($depPlugin->isDisabled()) {
+                    if ($depPlugin->isDisabled() or !$depPlugin->isInstalled()) {
                         Kitx::logBootError(new \Exception(Kitx::frmt("
                             Plugin '%s' require disabled kitrix plugin '%s',
                             so this plugin can't be loaded too.
@@ -331,7 +350,9 @@ final class PluginsManager
         foreach ($metaPlugins as $metaPlugin) {
 
             if (!$metaPlugin->isInstalled()) {
-                continue;
+                if ($metaPlugin->getPid() !== self::CORE_PLUGIN_ID) {
+                    continue;
+                }
             }
 
             if ($metaPlugin->isDisabled()) {
@@ -342,37 +363,6 @@ final class PluginsManager
 
             /** @var Plugin $plugin */
             $plugin = new $class($metaPlugin);
-
-            // install plugin
-            // todo move install to user GUI
-//            $installError = false;
-//            if (!$metaPlugin->isInstalled())
-//            {
-//                try
-//                {
-//                    // install
-////                    $plugin->onInstall();
-////
-////                    // mark as installed
-////                    $db = InternalDB::getInstance();
-////                    $installed = (array)$db->getDB(InternalDB::DB_PLUG_INSTALLED_PIDS);
-////                    $installed[] = $plugin->getId();
-////                    $db->writeDB(InternalDB::DB_PLUG_INSTALLED_PIDS, $installed);
-//                }
-//                catch (\Exception $e)
-//                {
-//                    $installError = true;
-//                    Kitx::logBootError($e);
-//                }
-//            }
-//
-//            if ($installError)
-//            {
-//                unset($plugin);
-//                continue;
-//            }
-//
-//            $metaPlugin->setIsInstalled(true);
 
             // validate Facade
             $reflector = new \ReflectionClass($plugin);

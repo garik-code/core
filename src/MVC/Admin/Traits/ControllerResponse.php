@@ -1,4 +1,16 @@
-<?php namespace Kitrix\MVC\Admin\Traits;
+<?php
+/******************************************************************************
+ * Copyright (c) 2017. Kitrix Team                                            *
+ * Kitrix is open source project, available under MIT license.                *
+ *                                                                            *
+ * @author: Konstantin Perov <fe3dback@yandex.ru>                             *
+ * Documentation:                                                             *
+ * @see https://kitrix-org.github.io/docs                                     *
+ *                                                                            *
+ *                                                                            *
+ ******************************************************************************/
+
+namespace Kitrix\MVC\Admin\Traits;
 
 const STATUS_OK = 200;
 const STATUS_REDIRECT = 301;

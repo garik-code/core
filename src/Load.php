@@ -1,4 +1,16 @@
-<?php namespace Kitrix;
+<?php
+/******************************************************************************
+ * Copyright (c) 2017. Kitrix Team                                            *
+ * Kitrix is open source project, available under MIT license.                *
+ *                                                                            *
+ * @author: Konstantin Perov <fe3dback@yandex.ru>                             *
+ * Documentation:                                                             *
+ * @see https://kitrix-org.github.io/docs                                     *
+ *                                                                            *
+ *                                                                            *
+ ******************************************************************************/
+
+namespace Kitrix;
 
 use Bitrix\Main\Config\Configuration;
 use Kitrix\Common\Kitx;
@@ -11,6 +23,12 @@ use Whoops\Run;
 
 const DS = DIRECTORY_SEPARATOR;
 
+/**
+ * Auto loader
+ *
+ * Class Load
+ * @package Kitrix
+ */
 final class Load
 {
     const KITRIX_ROOT_PATH = "local" . DS . "kitrix";
@@ -54,13 +72,17 @@ final class Load
             // init plugins (and core, actually core is plugin)
             PluginsManager::getInstance()->init();
 
-            // Build url router
-            $this->router = Router::getInstance();
-            $this->router->prepare($_REQUEST['to'] ?: "/");
+            // this run only in admin panel
+            if ($this->isAdminPanel())
+            {
+                // Build url router
+                $this->router = Router::getInstance();
+                $this->router->prepare($_REQUEST['to'] ?: "/");
 
-            // Inject into Kitrix
-            $bitrixHook = new BitrixAdmin();
-            $bitrixHook->injectIntoBitrix();
+                // Inject into Kitrix
+                $bitrixHook = new BitrixAdmin();
+                $bitrixHook->injectIntoBitrix();
+            }
         }
         catch (\Exception $e) {
 
@@ -77,7 +99,30 @@ final class Load
      * @return bool
      */
     public function isDebugMode() {
+
         return (bool)$this->debugModeOn;
+    }
+
+    /**
+     * Return true if we in admin panel
+     * @return bool
+     */
+    public function isAdminPanel() {
+
+        // check if url start with bitrix root variable
+        // like /bitrix/admin
+
+        $uri = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
+
+        if (count($uri)) {
+            $pop = array_shift($uri);
+
+            if ("/{$pop}" == BX_ROOT) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
