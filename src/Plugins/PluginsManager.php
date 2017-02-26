@@ -445,7 +445,9 @@ final class PluginsManager
 
         if (!class_exists($class)) {
             throw new \Exception(Kitx::frmt("
-                    Kitrix can't autoload plugin '%s', file 'vendor/autoload.php' is requiring in init code?
+                    Kitrix can't autoload plugin '%s', file 'vendor/autoload.php' not exist. 
+                    If is LOCAL plugin maybe need to run 
+                    'composer install' inside plugin folder?
                 ", [
                 $pluginMeta->getPid()
             ]));
