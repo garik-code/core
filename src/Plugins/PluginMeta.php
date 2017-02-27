@@ -14,9 +14,13 @@ namespace Kitrix\Plugins;
 
 use Kitrix\Common\Kitx;
 use Kitrix\Common\NotKitrixPluginException;
+use Kitrix\Load;
 
 final class PluginMeta
 {
+    // kitrix try to find files like README.md in plugin root folder
+    const README_SOURCES = ['readme', 'readmy', 'documentation'];
+
     /** @var \DirectoryIterator - plugin directory */
     private $realPath;
 
@@ -40,6 +44,12 @@ final class PluginMeta
 
     /** @var bool  */
     private $isProtected = false;
+
+    /** @var bool  */
+    private $localSource = false;
+
+    /** @var string - raw markdown README text (if exist) */
+    private $readmeMarkdownText = "";
 
     function __construct(\DirectoryIterator $realDirectory, $vendor)
     {
@@ -100,6 +110,16 @@ final class PluginMeta
     }
 
     /**
+     * Get underscored plugin name
+     * ex. kitrix_core (from \Kitrix\Core)
+     * @return string
+     */
+    public function getUnderscoredName(): string {
+
+        return strtolower($this->getVendorName()) . "_" . strtolower($this->getName());
+    }
+
+    /**
      * @return \DirectoryIterator
      */
     public function getDirectory(): \DirectoryIterator
@@ -148,11 +168,27 @@ final class PluginMeta
     }
 
     /**
+     * @return bool
+     */
+    public function isLocalSource(): bool
+    {
+        return $this->localSource;
+    }
+
+    /**
      * @return array
      */
     public function getDependenciesStatus() {
 
         return PluginsManager::getInstance()->getDependenciesStatusForPluginByPID($this->getPid());
+    }
+
+    /**
+     * @return string
+     */
+    public function getReadmeMarkdownText(): string
+    {
+        return $this->readmeMarkdownText;
     }
 
     /**
@@ -179,13 +215,22 @@ final class PluginMeta
         $this->name = $expectedPluginName;
         $this->vendorName = $expectedPluginNameSpace;
 
-        $protectedPluginPIDs = ['kitrix/core'];
-        if (in_array($this->pid, $protectedPluginPIDs)) {
+        // get plugin store (vendor, local, etc..)
+        $relativePath = str_replace(realpath($_SERVER['DOCUMENT_ROOT']), '',  $this->getDirectory()->getRealPath());
+        $segments = explode(DIRECTORY_SEPARATOR, trim($relativePath, DIRECTORY_SEPARATOR));
+        $store = array_shift($segments);
+
+        if ($store === Load::KITRIX_STORE)
+        {
+            $this->localSource = true;
+        }
+
+        // set protected plugins
+        if (in_array($this->pid, PluginsManager::PROTECTED_PIDS)) {
             $this->isProtected = true;
         }
 
         // validate config
-
         $config = PluginConfig::validateConfig($this);
         if (!$config) {
             return false;
@@ -193,8 +238,50 @@ final class PluginMeta
 
         // -- Set data if all ok
         $this->config = $config;
+
+        // -- try to load readme
+        $this->loadReadme();
         return true;
     }
 
+    /**
+     * This function try to find readme markdown
+     * file and load it.
+     */
+    private function loadReadme()
+    {
+        $tmpMarkdownText = false;
+
+        $rootPath = $this->getDirectory()->getRealPath();
+        $itt = new \DirectoryIterator($rootPath);
+        foreach ($itt as $file)
+        {
+            if (strtolower($file->getExtension()) !== 'md')
+            {
+                continue;
+            }
+
+            if (in_array(strtolower($file->getFilename()), self::README_SOURCES))
+            {
+                continue;
+            }
+
+            $tmpMarkdownText = file_get_contents($file->getRealPath());
+            break;
+        }
+
+        try
+        {
+            $parsed = \Parsedown::instance()->parse($tmpMarkdownText);
+        }
+        catch (\Exception $e)
+        {
+            Kitx::logBootError($e);
+            return false;
+        }
+
+        $this->readmeMarkdownText = $parsed;
+        return true;
+    }
 
 }

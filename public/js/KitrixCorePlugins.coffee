@@ -8,6 +8,7 @@ class KitrixCorePlugins
 
     if KitrixCorePluginsParams?
       @params = KitrixCorePluginsParams
+
     return
 
   ###

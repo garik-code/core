@@ -50,7 +50,7 @@
   }
 }
 
-.ktrx-about-block
+.ktrx-about-block, .ktrx-doc-block
 {
   background: white;
   padding: 10px 20px;
@@ -72,11 +72,26 @@
   }
 }
 
+.ktrx-doc-block
+{
+  max-width: 800px;
+
+  pre > code
+  {
+    padding: 10px 5px;
+    border: 1px solid gray;
+    box-sizing: border-box;
+    display: block;
+    overflow-x: scroll;
+  }
+}
+
 // ------ Plugins Page
 
 .ktrx-core-plugin-status, .ktrx-core-dep-status
 {
   color: gray;
+  white-space: nowrap;
 
   .kitrix-core-status-circle
   {
@@ -101,11 +116,21 @@
 
   &.ktrx-core-disabled
   {
-    color: darkred;
+    color: gray;
 
     .kitrix-core-status-circle
     {
-      background-color: darkred;
+      background-color: gray;
+    }
+  }
+
+  &.ktrx-core-not-installed
+  {
+    color: orange;
+
+    .kitrix-core-status-circle
+    {
+      background-color: orange;
     }
   }
 
@@ -118,5 +143,49 @@
       width: 8px;
       height: 8px;
     }
+  }
+}
+
+.ktrx-core-badge
+{
+
+  border: 1px solid;
+  padding: 2px 4px;
+  border-radius: 3px;
+  margin-right: 5px;
+  float: right;
+
+  &.ktrx-core-badge-protected
+  {
+    color: #1952D3;
+  }
+
+  &.ktrx-core-badge-local
+  {
+    color: #e40015;
+  }
+
+  &.ktrx-core-badge-vendor
+  {
+    color: #7a9d1e;
+  }
+}
+
+.ktrx-core-read-doc
+{
+  @bgColor: #006fcb;
+
+  font-size: 11px;
+  cursor: pointer;
+  color: @bgColor;
+  border: 1px solid @bgColor;
+  padding: 3px 6px;
+  border-radius: 3px;
+  display: inline-block;
+
+  &:hover, &:focus
+  {
+    color: lighten(@bgColor, 10%);
+    border-color: lighten(@bgColor, 10%);
   }
 }

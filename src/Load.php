@@ -31,7 +31,8 @@ const DS = DIRECTORY_SEPARATOR;
  */
 final class Load
 {
-    const KITRIX_ROOT_PATH = "local" . DS . "kitrix";
+    const KITRIX_STORE = "local";
+    const KITRIX_ROOT_PATH = self::KITRIX_STORE . DS . "kitrix";
     const KITRIX_PLUGINS_PATH = self::KITRIX_ROOT_PATH . DS . "plugins";
     const KITRIX_CONFIG_PATH = self::KITRIX_ROOT_PATH . DS . "db";
     const KITRIX_TMP_PATH = self::KITRIX_ROOT_PATH . DS . "tmp";

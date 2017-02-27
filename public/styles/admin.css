@@ -32,23 +32,38 @@
 .adm-main-menu-item.adm-kitrix.adm-main-menu-item-active .adm-main-menu-item-text {
   color: white;
 }
-.ktrx-about-block {
+.ktrx-about-block,
+.ktrx-doc-block {
   background: white;
   padding: 10px 20px;
   font-size: 18px;
 }
-.ktrx-about-block h1 {
+.ktrx-about-block h1,
+.ktrx-doc-block h1 {
   font-size: 32px;
 }
-.ktrx-about-block h2 {
+.ktrx-about-block h2,
+.ktrx-doc-block h2 {
   font-size: 26px;
 }
-.ktrx-about-block h3 {
+.ktrx-about-block h3,
+.ktrx-doc-block h3 {
   font-size: 22px;
+}
+.ktrx-doc-block {
+  max-width: 800px;
+}
+.ktrx-doc-block pre > code {
+  padding: 10px 5px;
+  border: 1px solid gray;
+  box-sizing: border-box;
+  display: block;
+  overflow-x: scroll;
 }
 .ktrx-core-plugin-status,
 .ktrx-core-dep-status {
   color: gray;
+  white-space: nowrap;
 }
 .ktrx-core-plugin-status .kitrix-core-status-circle,
 .ktrx-core-dep-status .kitrix-core-status-circle {
@@ -70,11 +85,19 @@
 }
 .ktrx-core-plugin-status.ktrx-core-disabled,
 .ktrx-core-dep-status.ktrx-core-disabled {
-  color: darkred;
+  color: gray;
 }
 .ktrx-core-plugin-status.ktrx-core-disabled .kitrix-core-status-circle,
 .ktrx-core-dep-status.ktrx-core-disabled .kitrix-core-status-circle {
-  background-color: darkred;
+  background-color: gray;
+}
+.ktrx-core-plugin-status.ktrx-core-not-installed,
+.ktrx-core-dep-status.ktrx-core-not-installed {
+  color: orange;
+}
+.ktrx-core-plugin-status.ktrx-core-not-installed .kitrix-core-status-circle,
+.ktrx-core-dep-status.ktrx-core-not-installed .kitrix-core-status-circle {
+  background-color: orange;
 }
 .ktrx-core-plugin-status.ktrx-core-dep-status,
 .ktrx-core-dep-status.ktrx-core-dep-status {
@@ -84,4 +107,34 @@
 .ktrx-core-dep-status.ktrx-core-dep-status .kitrix-core-status-circle {
   width: 8px;
   height: 8px;
+}
+.ktrx-core-badge {
+  border: 1px solid;
+  padding: 2px 4px;
+  border-radius: 3px;
+  margin-right: 5px;
+  float: right;
+}
+.ktrx-core-badge.ktrx-core-badge-protected {
+  color: #1952D3;
+}
+.ktrx-core-badge.ktrx-core-badge-local {
+  color: #e40015;
+}
+.ktrx-core-badge.ktrx-core-badge-vendor {
+  color: #7a9d1e;
+}
+.ktrx-core-read-doc {
+  font-size: 11px;
+  cursor: pointer;
+  color: #006fcb;
+  border: 1px solid #006fcb;
+  padding: 3px 6px;
+  border-radius: 3px;
+  display: inline-block;
+}
+.ktrx-core-read-doc:hover,
+.ktrx-core-read-doc:focus {
+  color: #008bfe;
+  border-color: #008bfe;
 }

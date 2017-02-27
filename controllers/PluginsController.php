@@ -2,6 +2,7 @@
 
 use Kitrix\Common\Kitx;
 use Kitrix\MVC\Admin\Controller;
+use Kitrix\Plugins\PluginMeta;
 use Kitrix\Plugins\PluginsManager;
 
 class PluginsController extends Controller
@@ -150,5 +151,22 @@ class PluginsController extends Controller
         }
 
         return array('json' => 'yey');
+    }
+
+    public function help($id)
+    {
+        $plugList = PluginsManager::getInstance()->getMetaPluginsList();
+
+        foreach ($plugList as $pluginMeta)
+        {
+            if ($pluginMeta->getUnderscoredName() !== $id)
+            {
+                continue;
+            }
+
+            $this->set('content', $pluginMeta->getReadmeMarkdownText());
+            $this->set('plugin', $pluginMeta);
+            break;
+        }
     }
 }

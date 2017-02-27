@@ -52,6 +52,13 @@ final class Core extends Plugin
         $routes[] = RouteFactory::makeRoute('/plugins/edit/', PluginsController::class, 'edit')
             ->setVisible(false);
 
+        $routes[] = RouteFactory::makeRoute(
+            '/plugins/help/{id}/',
+            PluginsController::class,
+            'help'
+        )
+            ->setVisible(false);
+
 
         return $routes;
 

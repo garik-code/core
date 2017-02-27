@@ -1,14 +1,14 @@
 {
     "extra": {
         "isKitrixPlugin": true,
-        "kitrixIcon": "fa-heartbeat",
+        "kitrixIcon": "fa-github-alt",
         "kitrixTitle": "KITRIX"
     },
     "name": "kitrix/core",
     "description": "Ядро kitrix. Предоставляет API для работы остальных плагинов",
     "type": "library",
     "license": "MIT",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "authors": [
         {
             "name": "Fe3dback",
@@ -22,7 +22,8 @@
     "require": {
         "league/plates": "^3.3",
         "symfony/routing": "^3.2",
-        "filp/whoops": "^2.1"
+        "filp/whoops": "^2.1",
+        "erusev/parsedown": "^1.6"
     },
     "require-dev": {
         "phpunit/phpunit": "^6.0"

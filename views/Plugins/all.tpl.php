@@ -15,13 +15,8 @@ $adminTable->AddHeaders([
         "default" => true,
     ],
     [
-        "id" => "INSTALLED",
-        "content" => "Установлен?",
-        "default" => true,
-    ],
-    [
-        "id" => "ENABLED",
-        "content" => "Включен?",
+        "id" => "STATUS",
+        "content" => "Статус",
         "default" => true,
     ],
     [
@@ -48,15 +43,39 @@ foreach ($plugins as $plugin) {
         <i class="fa <?=$plugin->getConfig()->getIcon()?>"></i>
         <?=$plugin->getConfig()->getAlias()?> (<?=$plugin->getPid()?>)
         <?if($plugin->isProtected()):?>
-            <small style="color: #1952D3;">
+            <small class="ktrx-core-badge ktrx-core-badge-protected" title="Плагин нельзя выключить">
                 <i class="fa fa-lock"></i>
                 Защишен
+            </small>
+        <?endif;?>
+        <?if($plugin->isLocalSource()):?>
+            <small class="ktrx-core-badge ktrx-core-badge-local" title="Локальный плагин, редактируемый">
+                <i class="fa fa-pencil"></i>
+                local
+            </small>
+        <?else:?>
+            <small class="ktrx-core-badge ktrx-core-badge-vendor" title="Из пакетного менеджера, не редактируемый">
+                <i class="fa fa-shield"></i>
+                composer
             </small>
         <?endif;?>
     </b><br/>
     <small>
         <?=$plugin->getConfig()->getDesc()?>
         <br /><br /><i>Лицензия: <?=$plugin->getConfig()->getLicence()?></i>
+        <?if($plugin->getReadmeMarkdownText() !== ""):?>
+            <?
+            $documentationUrl = \Kitrix\MVC\Router::getInstance()
+                ->generateLinkTo('kitrix_core_plugins_help_{id}', [
+                    'id' => $plugin->getUnderscoredName()
+                ])
+            ?>
+            <br /><br />
+            <a href="<?=$documentationUrl?>" class="ktrx-core-read-doc">
+                <i class="fa fa-book"></i>
+                Читать документацию..
+            </a>
+        <?endif;?>
     </small>
     <?
     $_fName = ob_get_clean();
@@ -78,28 +97,26 @@ foreach ($plugins as $plugin) {
     <?
     $_fAuthors = ob_get_clean();
 
-    // ============ INSTALLED? =============
+    // ============ STATUS =============
     ob_start();
     ?>
-    <div class="ktrx-core-plugin-status <?=$plugin->isInstalled() ? "ktrx-core-enabled" : "ktrx-core-disabled"?>">
-        <?if($plugin->isInstalled()):?>
-            <span class="fa fa-check"></span>
-            Установлен
-        <?else:?>
-            <span class="fa fa-exclamation-circle"></span>
-            Не установлен
-        <?endif;?>
-    </div>
-    <?
-    $_fInstalled = ob_get_clean();
-
-    // ============ ENABLED? =============
-    ob_start();
-    ?>
-        <div class="ktrx-core-plugin-status <?=!$plugin->isDisabled() ? "ktrx-core-enabled" : "ktrx-core-disabled"?>">
-            <div class="kitrix-core-status-circle"></div>
-            <?=!$plugin->isDisabled() ? "Включен" : "Выключен"?>
+    <?if(!$plugin->isDisabled()):?>
+        <div class="ktrx-core-plugin-status ktrx-core-enabled">
+            <i class="fa fa-check"></i> Работает
         </div>
+    <?else:?>
+        <?if($plugin->isInstalled()):?>
+            <div class="ktrx-core-plugin-status ktrx-core-disabled">
+                <div class="kitrix-core-status-circle"></div> Выключен
+            </div>
+        <?else:?>
+            <div class="ktrx-core-plugin-status ktrx-core-not-installed">
+                <i class="fa fa-exclamation-circle"></i>
+                Не установлен
+            </div>
+        <?endif;?>
+    <?endif;?>
+
     <?
     $_fStatus = ob_get_clean();
 
@@ -139,8 +156,7 @@ foreach ($plugins as $plugin) {
 
     $row->AddViewField("NAME", $_fName);
     $row->AddViewField("AUTHOR", $_fAuthors);
-    $row->AddViewField("INSTALLED", $_fInstalled);
-    $row->AddViewField("ENABLED", $_fStatus);
+    $row->AddViewField("STATUS", $_fStatus);
     $row->AddViewField("REQUIREMENTS", $_fRequirements);
     $row->AddViewField("VERSION", $_fVersion);
 

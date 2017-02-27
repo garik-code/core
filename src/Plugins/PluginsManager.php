@@ -24,6 +24,7 @@ final class PluginsManager
 
     const FIND_PATH = [Load::KITRIX_PLUGINS_PATH, "vendor"];
     const CORE_PLUGIN_ID = "kitrix/core";
+    const PROTECTED_PIDS = [self::CORE_PLUGIN_ID];
     const VALID_FACADE = "Kitrix\\Plugins\\Plugin";
 
     /** @var array - array of disabled plugin PIDS */
