@@ -12,6 +12,7 @@
 
 namespace Kitrix\Plugins;
 
+use ICanBoogie\Inflector;
 use Kitrix\Common\Kitx;
 use Kitrix\Common\NotKitrixPluginException;
 use Kitrix\Load;
@@ -56,7 +57,7 @@ final class PluginMeta
         if (!is_dir($realDirectory->getRealPath())) {
             throw new \Exception(Kitx::frmt("
                 Invalid realPath provided to PluginMeta constructor.
-                Directory '%s' shoul be exist, accessible and valid kitrix plugin dir
+                Directory '%s' should be exist, accessible and valid kitrix plugin dir
             ", [$realDirectory->getRealPath()]));
         }
 
@@ -200,20 +201,16 @@ final class PluginMeta
      */
     private function validate() {
 
+        $infl = Inflector::get();
+
         // Ok, this is kitrix plugin folder.
         // Now we can validate composer config
-        $expectedPluginID = $this->getVendorName() . "/" . $this->getDirectory()->getFilename();
-        $expectedPluginID = strtolower($expectedPluginID);
+        $_vendor = $this->getVendorName();
+        $_class  = $this->getDirectory()->getFilename();
 
-        $expectedPluginNameSpace = strtolower($this->getVendorName());
-        $expectedPluginNameSpace = strtoupper(substr($expectedPluginNameSpace,0,1)) . substr($expectedPluginNameSpace,1);
-
-        $expectedPluginName = strtolower($this->getDirectory()->getFilename());
-        $expectedPluginName = strtoupper(substr($expectedPluginName,0,1)) . substr($expectedPluginName, 1);
-
-        $this->pid = $expectedPluginID;
-        $this->name = $expectedPluginName;
-        $this->vendorName = $expectedPluginNameSpace;
+        $this->pid = $infl->underscore($_vendor . "/" . $_class);
+        $this->name = $infl->camelize($_class);
+        $this->vendorName = $infl->camelize($_vendor);
 
         // get plugin store (vendor, local, etc..)
         $relativePath = str_replace(realpath($_SERVER['DOCUMENT_ROOT']), '',  $this->getDirectory()->getRealPath());

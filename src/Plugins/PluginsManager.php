@@ -629,6 +629,15 @@ final class PluginsManager
         return false;
     }
 
+    /**
+     * Install plugin (by meta ref)
+     *
+     * return false - if install process halt
+     * return true otherwise (if success)
+     *
+     * @param PluginMeta $pluginMeta
+     * @return bool
+     */
     public function installPlugin(PluginMeta $pluginMeta)
     {
         /** @var Plugin $staticPlugin */
