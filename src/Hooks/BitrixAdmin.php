@@ -62,14 +62,20 @@ echo \Kitrix\Load::getInstance()->adminEntryPoint();
 
                 $relativeAssetPath = str_replace($projectRoot, '', $absPath);
 
-                if ($asset->getType() === \Kitrix\Entities\Asset::JS) {
-                    Asset::getInstance()->addJs($relativeAssetPath);
-                }
+                try
+                {
+                    if ($asset->getType() === \Kitrix\Entities\Asset::JS) {
+                        Asset::getInstance()->addJs($relativeAssetPath);
+                    }
 
-                if ($asset->getType() === \Kitrix\Entities\Asset::CSS) {
-                    $APPLICATION->SetAdditionalCSS($relativeAssetPath);
+                    if ($asset->getType() === \Kitrix\Entities\Asset::CSS) {
+                        $APPLICATION->SetAdditionalCSS($relativeAssetPath);
+                    }
                 }
-
+                catch (\Exception $e)
+                {
+                    Kitx::logBootError($e);
+                }
             }
         }
 

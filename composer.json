@@ -1,7 +1,7 @@
 {
     "extra": {
         "isKitrixPlugin": true,
-        "kitrixIcon": "fa-github ",
+        "kitrixIcon": "fa-github",
         "kitrixTitle": "KITRIX"
     },
     "name": "kitrix/core",

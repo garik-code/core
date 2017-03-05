@@ -24,12 +24,11 @@ final class Asset
 
     function __construct($relName, $type = self::CSS)
     {
-        if (substr($relName,0,1) !== DIRECTORY_SEPARATOR) {
-            throw new \Exception(Kitx::frmt("
-                Relpath of asset should start from slash.
-                Expected '%s', provided: '%s'
-            ", [DIRECTORY_SEPARATOR.$relName, $relName]));
-        }
+        // unitize slashes
+        $relName = trim($relName, DIRECTORY_SEPARATOR);
+
+        // add first slash
+        $relName = DIRECTORY_SEPARATOR . $relName;
 
         $validTypes = [self::CSS, self::JS];
         if (!in_array($type, $validTypes)) {

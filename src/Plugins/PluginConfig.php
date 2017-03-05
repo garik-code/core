@@ -189,7 +189,7 @@ final class PluginConfig
                 ]
             ],
             'require' => [
-                $__validateRule_containArrayKey => "composer/installers"
+                $__validateRule_containArrayKey => "kitrix/installer"
             ],
         ];
 
