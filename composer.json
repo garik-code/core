@@ -8,7 +8,7 @@
     "description": "Ядро kitrix. Предоставляет API для работы остальных плагинов",
     "type": "library",
     "license": "MIT",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "authors": [
         {
             "name": "Fe3dback",
